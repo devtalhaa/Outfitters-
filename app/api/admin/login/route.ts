@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         cookieStore.set("admin_token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "lax", // Changed from 'strict' to 'lax' for better redirect compatibility
+            sameSite: "lax",
             maxAge: 60 * 60 * 24, // 1 day
             path: "/",
         });
