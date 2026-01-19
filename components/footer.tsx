@@ -1,8 +1,43 @@
+"use client"
+
+import React from "react"
 import Link from "next/link"
 import { Facebook, Instagram, Twitter, Youtube, MapPin, Phone, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
+import { toast } from "sonner"
 export function Footer() {
+  const [email, setEmail] = React.useState("")
+  const [loading, setLoading] = React.useState(false)
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) {
+      toast.error("Please enter an email address")
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      })
+      const data = await res.json()
+
+      if (res.ok) {
+        toast.success(data.message || "Subscribed successfully!")
+        setEmail("")
+      } else {
+        toast.error(data.error || "Subscription failed")
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <footer className="bg-primary text-primary-foreground">
       {/* Newsletter Section */}
@@ -13,19 +48,23 @@ export function Footer() {
             <p className="text-primary-foreground/70 mb-6">
               Subscribe to get special offers, free giveaways, and exclusive deals.
             </p>
-            <div className="flex gap-2">
+            <form onSubmit={handleSubscribe} className="flex gap-2">
               <input
                 type="email"
                 placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="flex-1 px-4 py-3 bg-primary-foreground/10 border border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:border-primary-foreground/50"
               />
               <Button
+                type="submit"
+                disabled={loading}
                 variant="secondary"
-                className="px-6 bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+                className="px-6 bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-bold"
               >
-                Subscribe
+                {loading ? "Subscribing..." : "Subscribe"}
               </Button>
-            </div>
+            </form>
           </div>
         </div>
       </div>

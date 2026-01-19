@@ -1,25 +1,40 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Search, User, Heart, ShoppingBag, Menu, X, ChevronDown } from "lucide-react"
+import { Search, Heart, ShoppingBag, Menu, X, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { useWishlist } from "@/context/wishlist-context"
 
-const navItems = [
-  { label: "NEW ARRIVALS", href: "/new-arrivals", highlight: true },
-  { label: "MEN", href: "/men", hasDropdown: true },
-  { label: "WOMEN", href: "/women", hasDropdown: true },
-  { label: "KIDS", href: "/kids", hasDropdown: true },
-  { label: "ACCESSORIES", href: "/accessories", hasDropdown: true },
-  { label: "SALE", href: "/sale", sale: true },
-]
+const navItems: any[] = []
 
 export function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
+  const { wishlist } = useWishlist()
+
+  useEffect(() => {
+    const updateCartCount = () => {
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]")
+      const count = cart.reduce((acc: number, item: any) => acc + item.quantity, 0)
+      setCartCount(count)
+    }
+
+    updateCartCount()
+    window.addEventListener("storage", updateCartCount)
+
+    // Check for updates every second as a fallback for same-tab updates
+    const interval = setInterval(updateCartCount, 1000)
+
+    return () => {
+      window.removeEventListener("storage", updateCartCount)
+      clearInterval(interval)
+    }
+  }, [])
 
   return (
-    <header className="sticky top-0 z-50 bg-background border-b border-border">
+    <header className=" top-0 z-50 bg-white text-black shadow-sm ">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Mobile Menu */}
@@ -40,9 +55,8 @@ export function Header() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className={`px-6 py-4 border-b border-border hover:bg-muted transition-colors ${
-                      item.sale ? "text-accent font-semibold" : ""
-                    } ${item.highlight ? "font-semibold" : ""}`}
+                    className={`px-6 py-4 border-b border-border hover:bg-muted transition-colors ${item.sale ? "text-accent font-semibold" : ""
+                      } ${item.highlight ? "font-semibold" : ""}`}
                   >
                     {item.label}
                   </Link>
@@ -62,33 +76,42 @@ export function Header() {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`text-sm font-medium flex items-center gap-1 hover:opacity-70 transition-opacity ${
-                  item.sale ? "text-accent" : ""
-                }`}
+                className={`text-sm font-medium flex items-center gap-1 hover:opacity-70 transition-opacity ${item.sale ? "text-accent" : ""
+                  }`}
               >
                 {item.label}
-                {item.hasDropdown && <ChevronDown className="h-3 w-3" />}
               </Link>
             ))}
           </nav>
 
           {/* Actions */}
           <div className="flex items-center gap-1 lg:gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setSearchOpen(!searchOpen)} className="relative">
+            <Button variant="ghost" size="icon" onClick={() => setSearchOpen(!searchOpen)} className="relative hover:bg-muted">
               <Search className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="hidden sm:flex">
-              <User className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="hidden sm:flex">
-              <Heart className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingBag className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
-                0
-              </span>
-            </Button>
+            <Link href="/dashboard" className="hidden sm:flex p-2 hover:bg-muted rounded-md transition-colors">
+              <LayoutDashboard className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+            </Link>
+            <Link href="/wishlist">
+              <Button variant="ghost" size="icon" className="hidden sm:flex relative">
+                <Heart className={`h-5 w-5 ${wishlist.length > 0 ? "fill-red-500 text-red-500" : ""}`} />
+                {wishlist.length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-[8px] font-black flex items-center justify-center animate-in zoom-in duration-300">
+                    {wishlist.length}
+                  </span>
+                )}
+              </Button>
+            </Link>
+            <Link href="/cart">
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingBag className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-black flex items-center justify-center animate-in zoom-in duration-300">
+                    {cartCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
           </div>
         </div>
 

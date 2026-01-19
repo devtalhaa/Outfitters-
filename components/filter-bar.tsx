@@ -9,69 +9,140 @@ import { Checkbox } from "@/components/ui/checkbox"
 
 const sizes = ["39", "40", "41", "42", "43", "44", "45"]
 const colors = ["Black", "White", "Brown", "Navy", "Grey", "Tan"]
-const priceRanges = ["Under PKR 3,000", "PKR 3,000 - 5,000", "PKR 5,000 - 8,000", "Over PKR 8,000"]
+const priceRanges = [
+  { label: "Under PKR 3,000", min: "", max: "3000" },
+  { label: "PKR 3,000 - 5,000", min: "3000", max: "5000" },
+  { label: "PKR 5,000 - 8,000", min: "5000", max: "8000" },
+  { label: "Over PKR 8,000", min: "8000", max: "" }
+]
 
-export function FilterBar() {
-  const [view, setView] = useState<"grid" | "list">("grid")
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([])
+interface FilterBarProps {
+  filters: any
+  updateFilters: (newFilters: any) => void
+  activeCategory: string
+  onCategoryChange: (category: string) => void
+}
 
-  const removeFilter = (filter: string) => {
-    setSelectedFilters(selectedFilters.filter((f) => f !== filter))
-  }
+export function FilterBar({ filters, updateFilters, activeCategory, onCategoryChange }: FilterBarProps) {
+  const activeFiltersCount = (filters.size ? 1 : 0) + (filters.color ? 1 : 0) + (filters.minPrice || filters.maxPrice ? 1 : 0)
+  const categories = ["All Footwear", "Sneakers", "Loafers", "Sandals", "Slides", "Sports Shoes", "Formal"]
 
   return (
-    <div className="sticky top-16 lg:top-20 z-40 bg-background border-b border-border">
+    <div className=" top-16 lg:top-20 z-40 bg-background border-b border-border shadow-sm">
       <div className="container mx-auto px-4 py-4">
+        {/* Category Filter Buttons */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={(e) => {
+                e.preventDefault()
+                onCategoryChange(category)
+              }}
+              className={`px-6 py-2.5 text-[10px] font-black tracking-widest uppercase transition-all duration-300 border-2 ${activeCategory === category
+                ? "bg-foreground text-background border-foreground shadow-lg scale-105"
+                : "bg-background text-foreground border-transparent hover:border-border"
+                }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
         <div className="flex items-center justify-between gap-4">
           {/* Left Side - Filters */}
           <div className="flex items-center gap-3">
             {/* Mobile Filter Button */}
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" className="lg:hidden gap-2 bg-transparent">
+                <Button variant="outline" className="lg:hidden gap-2 bg-transparent rounded-none border-2 border-foreground group relative">
                   <SlidersHorizontal className="h-4 w-4" />
-                  Filters
+                  <span className="text-[10px] font-black uppercase tracking-widest">Filters</span>
+                  {activeFiltersCount > 0 && (
+                    <span className="absolute -top-2 -right-2 w-5 h-5 bg-foreground text-background text-[9px] font-black flex items-center justify-center rounded-full">
+                      {activeFiltersCount}
+                    </span>
+                  )}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[300px]">
-                <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
+              <SheetContent side="left" className="w-[300px] p-0">
+                <SheetHeader className="p-6 border-b border-border">
+                  <SheetTitle className="text-xl font-black uppercase tracking-tighter">Filters</SheetTitle>
                 </SheetHeader>
-                <div className="mt-6 space-y-6">
-                  <FilterSection title="Size" options={sizes} />
-                  <FilterSection title="Color" options={colors} />
-                  <FilterSection title="Price" options={priceRanges} />
+                <div className="p-6 space-y-10">
+                  <FilterSection
+                    title="Size"
+                    options={sizes}
+                    currentValue={filters.size}
+                    onChange={(val) => updateFilters({ size: val })}
+                  />
+                  <FilterSection
+                    title="Color"
+                    options={colors}
+                    currentValue={filters.color}
+                    onChange={(val) => updateFilters({ color: val })}
+                  />
+                  <div className="space-y-4">
+                    <h3 className="text-[10px] font-black uppercase tracking-widest">Price Range</h3>
+                    <div className="grid grid-cols-1 gap-2">
+                      {priceRanges.map(range => (
+                        <button
+                          key={range.label}
+                          onClick={() => updateFilters({ minPrice: range.min, maxPrice: range.max })}
+                          className={`text-left px-4 py-3 text-[10px] font-bold uppercase border transition-all ${filters.maxPrice === range.max ? "bg-foreground text-background border-foreground" : "border-border hover:border-foreground"}`}
+                        >
+                          {range.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
 
             {/* Desktop Filters */}
             <div className="hidden lg:flex items-center gap-2">
-              <FilterDropdown title="Size" options={sizes} />
-              <FilterDropdown title="Color" options={colors} />
-              <FilterDropdown title="Price" options={priceRanges} />
+              <FilterDropdown
+                title="Size"
+                options={sizes}
+                currentValue={filters.size}
+                onSelect={(val) => updateFilters({ size: val })}
+              />
+              <FilterDropdown
+                title="Color"
+                options={colors}
+                currentValue={filters.color}
+                onSelect={(val) => updateFilters({ color: val })}
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2 bg-transparent rounded-none border-foreground/20 hover:border-foreground transition-all">
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Price Range</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56 p-2 rounded-none">
+                  {priceRanges.map(range => (
+                    <DropdownMenuItem
+                      key={range.label}
+                      onClick={() => updateFilters({ minPrice: range.min, maxPrice: range.max })}
+                      className={`text-[10px] font-bold uppercase p-3 cursor-pointer mb-1 last:mb-0 ${filters.maxPrice === range.max ? "bg-foreground text-background focus:bg-foreground focus:text-background" : ""}`}
+                    >
+                      {range.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
-            {/* Active Filters */}
-            {selectedFilters.length > 0 && (
-              <div className="hidden lg:flex items-center gap-2 ml-4 pl-4 border-l border-border">
-                {selectedFilters.map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => removeFilter(filter)}
-                    className="flex items-center gap-1 px-2 py-1 bg-muted text-sm"
-                  >
-                    {filter}
-                    <X className="h-3 w-3" />
-                  </button>
-                ))}
-                <button
-                  onClick={() => setSelectedFilters([])}
-                  className="text-sm text-muted-foreground hover:text-foreground underline"
-                >
-                  Clear all
-                </button>
-              </div>
+            {/* Clear All */}
+            {activeFiltersCount > 0 && (
+              <button
+                onClick={() => updateFilters({ size: "", color: "", minPrice: "", maxPrice: "" })}
+                className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-red-500 transition-colors ml-4 underline underline-offset-4"
+              >
+                Reset Filters
+              </button>
             )}
           </div>
 
@@ -79,30 +150,31 @@ export function FilterBar() {
           <div className="flex items-center gap-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2 bg-transparent">
-                  Sort by: Featured
+                <Button variant="outline" className="gap-3 bg-transparent rounded-none border-foreground hover:bg-foreground hover:text-background transition-all">
+                  <span className="text-[10px] font-black uppercase tracking-widest">
+                    Sort: {filters.sort === "price-asc" ? "Low to High" : filters.sort === "price-desc" ? "High to Low" : filters.sort === "newest" ? "Newest" : "Featured"}
+                  </span>
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem>Featured</DropdownMenuItem>
-                <DropdownMenuItem>Best Selling</DropdownMenuItem>
-                <DropdownMenuItem>Newest</DropdownMenuItem>
-                <DropdownMenuItem>Price: Low to High</DropdownMenuItem>
-                <DropdownMenuItem>Price: High to Low</DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-56 p-2 rounded-none">
+                <DropdownMenuItem onClick={() => updateFilters({ sort: "featured" })} className="text-[10px] font-bold uppercase p-3 cursor-pointer">Featured</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => updateFilters({ sort: "newest" })} className="text-[10px] font-bold uppercase p-3 cursor-pointer">Newest Arrivals</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => updateFilters({ sort: "price-asc" })} className="text-[10px] font-bold uppercase p-3 cursor-pointer">Price: Low to High</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => updateFilters({ sort: "price-desc" })} className="text-[10px] font-bold uppercase p-3 cursor-pointer">Price: High to Low</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <div className="hidden sm:flex items-center border border-border">
+            <div className="hidden sm:flex items-center border border-foreground">
               <button
-                onClick={() => setView("grid")}
-                className={`p-2 ${view === "grid" ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+                onClick={() => updateFilters({ view: "grid" })}
+                className={`p-2.5 ${filters.view === "grid" ? "bg-foreground text-background" : "hover:bg-muted"}`}
               >
                 <Grid3X3 className="h-4 w-4" />
               </button>
               <button
-                onClick={() => setView("list")}
-                className={`p-2 ${view === "list" ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+                onClick={() => updateFilters({ view: "list" })}
+                className={`p-2.5 ${filters.view === "list" ? "bg-foreground text-background" : "hover:bg-muted"}`}
               >
                 <LayoutList className="h-4 w-4" />
               </button>
@@ -114,22 +186,24 @@ export function FilterBar() {
   )
 }
 
-function FilterDropdown({ title, options }: { title: string; options: string[] }) {
+function FilterDropdown({ title, options, currentValue, onSelect }: { title: string; options: string[]; currentValue: string; onSelect: (val: string) => void }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="gap-2 bg-transparent">
-          {title}
+        <Button variant="outline" className={`gap-2 bg-transparent rounded-none transition-all ${currentValue ? "border-foreground bg-muted ring-1 ring-foreground" : "border-foreground/20 hover:border-foreground"}`}>
+          <span className="text-[10px] font-bold uppercase tracking-widest">{title}{currentValue && `: ${currentValue}`}</span>
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-48">
+      <DropdownMenuContent align="start" className="w-48 p-2 rounded-none">
         {options.map((option) => (
-          <DropdownMenuItem key={option} className="flex items-center gap-2">
-            <Checkbox id={option} />
-            <label htmlFor={option} className="flex-1 cursor-pointer">
-              {option}
-            </label>
+          <DropdownMenuItem
+            key={option}
+            onClick={() => onSelect(currentValue === option ? "" : option)}
+            className={`flex items-center justify-between text-[10px] font-bold uppercase p-3 cursor-pointer mb-1 last:mb-0 ${currentValue === option ? "bg-foreground text-background focus:bg-foreground focus:text-background" : ""}`}
+          >
+            {option}
+            {currentValue === option && <X className="w-3 h-3" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
@@ -137,16 +211,19 @@ function FilterDropdown({ title, options }: { title: string; options: string[] }
   )
 }
 
-function FilterSection({ title, options }: { title: string; options: string[] }) {
+function FilterSection({ title, options, currentValue, onChange }: { title: string; options: string[]; currentValue: string; onChange: (val: string) => void }) {
   return (
-    <div className="space-y-3">
-      <h3 className="font-semibold">{title}</h3>
-      <div className="space-y-2">
+    <div className="space-y-4">
+      <h3 className="text-[10px] font-black uppercase tracking-widest">{title}</h3>
+      <div className="grid grid-cols-3 gap-2">
         {options.map((option) => (
-          <label key={option} className="flex items-center gap-2 cursor-pointer">
-            <Checkbox id={`mobile-${option}`} />
-            <span className="text-sm">{option}</span>
-          </label>
+          <button
+            key={option}
+            onClick={() => onChange(currentValue === option ? "" : option)}
+            className={`px-3 py-3 text-[10px] font-bold uppercase border transition-all ${currentValue === option ? "bg-foreground text-background border-foreground shadow-md" : "border-border hover:border-foreground"}`}
+          >
+            {option}
+          </button>
         ))}
       </div>
     </div>
