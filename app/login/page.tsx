@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Lock, Loader2, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
@@ -10,7 +9,6 @@ import Image from "next/image"
 export default function LoginPage() {
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
-    const router = useRouter()
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -24,7 +22,11 @@ export default function LoginPage() {
 
             if (res.ok) {
                 toast.success("Welcome back, Admin")
-                router.push("/dashboard")
+                // Use window.location.href for full page reload to ensure cookie propagation
+                // Add small delay to ensure cookie is set before redirect
+                setTimeout(() => {
+                    window.location.href = "/dashboard"
+                }, 100)
             } else {
                 toast.error("Invalid password")
             }
