@@ -90,6 +90,24 @@ export async function POST(req: NextRequest) {
         const sizes = JSON.parse(formData.get("sizes") as string);
         const slug = name.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "");
 
+        // Handle Size Chart
+        let sizeChartUrl = undefined;
+        const sizeChartFile = formData.get("sizeChart") as File | null;
+        if (sizeChartFile) {
+            const arrayBuffer = await sizeChartFile.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            const uploadResponse: any = await new Promise((resolve, reject) => {
+                cloudinary.uploader.upload_stream(
+                    { folder: "outfitters/size-charts" },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                ).end(buffer);
+            });
+            sizeChartUrl = uploadResponse.secure_url;
+        }
+
         const imageFiles = formData.getAll("images") as File[];
         const imageUrls: string[] = [];
 
@@ -120,6 +138,7 @@ export async function POST(req: NextRequest) {
             colors,
             sizes,
             images: imageUrls,
+            sizeChart: sizeChartUrl,
         });
 
         return NextResponse.json(product, { status: 201 });

@@ -1,51 +1,89 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Loader2 } from "lucide-react"
 
 interface CollectionHeroProps {
   activeCategory: string
   onCategoryChange: (category: string) => void
+  initialSliders?: any[]
+  categories?: any[]
 }
 
-export function CollectionHero({ activeCategory, onCategoryChange }: CollectionHeroProps) {
-  const categories = ["All Footwear", "Sneakers", "Loafers", "Sandals", "Slides", "Sports Shoes", "Formal"]
+export function CollectionHero({ activeCategory, onCategoryChange, initialSliders = [], categories = [] }: CollectionHeroProps) {
+  const [sliders, setSliders] = useState<any[]>(initialSliders)
+  const [currentIndex, setCurrentIndex] = useState(0)
+
+  useEffect(() => {
+    // Only fetch if initialSliders is empty (fallback)
+    if (initialSliders.length === 0) {
+      const fetchSliders = async () => {
+        try {
+          const res = await fetch("/api/admin/slider")
+          const data = await res.json()
+          setSliders(data)
+        } catch (error) {
+          console.error("Failed to fetch sliders:", error)
+        }
+      }
+      fetchSliders()
+    }
+  }, [initialSliders])
+
+  useEffect(() => {
+    if (sliders.length <= 1) return
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % sliders.length)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [sliders])
+
+  const currentBg = sliders.length > 0
+    ? sliders[currentIndex].imageUrl
+    : ''
 
   return (
     <section
-      className="h-screen relative -mt-16 lg:-mt-20 pt-16 lg:pt-20"
+      className="h-screen relative -mt-16 lg:-mt-20 pt-16 lg:pt-20 transition-all duration-1000 ease-in-out"
       style={{
-        backgroundImage: 'url(/black-oxford-shoes-polished.jpg)',
+        backgroundImage: currentBg ? `url(${currentBg})` : 'none',
         backgroundAttachment: 'fixed',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
+        backgroundRepeat: 'no-repeat',
+        backgroundColor: '#000' // Dark fallback
       }}
     >
-      {/* <div className="container mx-auto px-4 py-8 relative z-10 bg-background/80 backdrop-blur-sm"> */}
-      {/*       
-        <nav className="flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase mb-6 text-muted-foreground">
-          <Link href="/" className="hover:text-foreground transition-colors">
-            Home
-          </Link>
-          <ChevronRight className="h-3 w-3" />
-          <span className="text-foreground">Footwear</span>
-        </nav> */}
-
-
-      {/* <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl lg:text-5xl font-black tracking-tighter uppercase mb-2">FOOTWEAR</h1>
-            <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest italic">Discover our latest collection of premium men&apos;s footwear</p>
+      {/* Category List Section */}
+      <div className="absolute top-0 left-0 right-0 z-30 bg-background/90 backdrop-blur-md border-b border-border py-6 overflow-x-auto">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-center items-center gap-8 lg:gap-16 whitespace-nowrap">
+            {categories.map((cat) => (
+              <button
+                key={cat._id}
+                onClick={() => onCategoryChange(cat.name)}
+                className={`text-[10px] lg:text-[11px] font-black tracking-[0.3em] uppercase transition-all duration-300 relative group ${activeCategory === cat.name ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                {cat.name}
+                <span className={`absolute -bottom-2 left-0 w-full h-0.5 bg-foreground transition-transform duration-300 origin-left ${activeCategory === cat.name ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`} />
+              </button>
+            ))}
           </div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-            Explore the ultimate style
-          </p>
-        </div> */}
-
-
-
-      {/* </div> */}
+        </div>
+      </div>
+      {/* Optional: Add indicators if multiple slides */}
+      {sliders.length > 1 && (
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+          {sliders.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentIndex(i)}
+              className={`w-12 h-1 border-2 transition-all ${i === currentIndex ? "border-foreground bg-foreground" : "border-foreground/20 bg-foreground/10 hover:border-foreground/50"}`}
+            />
+          ))}
+        </div>
+      )}
     </section >
   )
 }

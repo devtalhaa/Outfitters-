@@ -13,7 +13,11 @@ import {
   Facebook,
   Twitter,
   Instagram,
-  Loader2
+  Loader2,
+  Minus,
+  Plus,
+  Ruler,
+  X
 } from "lucide-react"
 import { ProductGallery } from "@/components/product-gallery"
 import { ProductRecommendations } from "@/components/product-recommendations"
@@ -43,6 +47,7 @@ interface Product {
   category: string;
   composition?: string;
   care?: string;
+  sizeChart?: string;
   articleCode: string;
 }
 
@@ -53,8 +58,10 @@ interface ProductDetailProps {
 export function ProductDetail({ product }: ProductDetailProps) {
   const [selectedColor, setSelectedColor] = useState(product.colors[0]?.name || "Default")
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
+  const [quantity, setQuantity] = useState(1)
   const [viewerCount, setViewerCount] = useState(12)
   const [isAdding, setIsAdding] = useState(false)
+  const [showSizeChart, setShowSizeChart] = useState(false)
   const { toggleWishlist, isWishlisted } = useWishlist()
   const router = useRouter()
 
@@ -84,7 +91,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
     )
 
     if (existingItemIndex > -1) {
-      cart[existingItemIndex].quantity += 1
+      cart[existingItemIndex].quantity += quantity
     } else {
       cart.push({
         id: productId,
@@ -93,7 +100,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
         image: product.images[0],
         size: selectedSize,
         color: selectedColor,
-        quantity: 1
+        quantity: quantity
       })
     }
 
@@ -139,7 +146,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
             </div>
             <button
               onClick={() => toggleWishlist(product._id)}
-              className="p-3 border-2 border-foreground/10 hover:border-foreground transition-all group"
+              className="p-3 border-2 border-foreground/10 hover:border-foreground transition-all group rounded-full"
             >
               <Heart className={`w-5 h-5 transition-transform group-hover:scale-110 ${isWishlisted(product._id) ? "fill-red-500 text-red-500" : ""}`} />
             </button>
@@ -153,13 +160,13 @@ export function ProductDetail({ product }: ProductDetailProps) {
               )}
             </div>
             {discount > 0 && (
-              <span className="bg-red-500 text-white text-[10px] font-black px-3 py-1.5 uppercase tracking-widest shadow-xl">
+              <span className="bg-red-500 text-white text-[10px] font-black px-3 py-1.5 uppercase tracking-widest shadow-xl rounded-full">
                 -{discount}% OFF
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-3 mb-10 p-5 bg-foreground/[0.03] border-l-4 border-foreground shadow-sm">
+          <div className="flex items-center gap-3 mb-10 p-5 bg-foreground/[0.03] border-l-4 border-foreground shadow-sm rounded-r-xl">
             <div className="relative w-2 h-2">
               <div className="absolute inset-0 bg-green-500 rounded-full animate-ping"></div>
               <div className="relative w-2 h-2 bg-green-500 rounded-full"></div>
@@ -176,9 +183,9 @@ export function ProductDetail({ product }: ProductDetailProps) {
                 <button
                   key={color.name}
                   onClick={() => setSelectedColor(color.name)}
-                  className={`group relative w-12 h-12 border-2 transition-all p-1 ${selectedColor === color.name ? "border-foreground shadow-lg scale-110" : "border-transparent hover:border-border"}`}
+                  className={`group relative w-12 h-12 border-2 transition-all p-1 rounded-full ${selectedColor === color.name ? "border-foreground shadow-lg scale-110" : "border-transparent hover:border-border"}`}
                 >
-                  <div className="w-full h-full shadow-inner" style={{ backgroundColor: color.value }} />
+                  <div className="w-full h-full shadow-inner rounded-full" style={{ backgroundColor: color.value }} />
                 </button>
               ))}
             </div>
@@ -186,7 +193,17 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
           <div className="mb-10">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-[10px] font-black tracking-widest uppercase">Select Size (EU)</p>
+              <div className="flex items-center gap-4">
+                <p className="text-[10px] font-black tracking-widest uppercase">Select Size (EU)</p>
+                {product.sizeChart && (
+                  <button
+                    onClick={() => setShowSizeChart(true)}
+                    className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors underline"
+                  >
+                    <Ruler className="w-4 h-4" /> Size Chart
+                  </button>
+                )}
+              </div>
               {selectedSizeInfo && selectedSizeInfo.stock <= 5 && selectedSizeInfo.stock > 0 && (
                 <span className="text-[10px] font-black text-red-500 uppercase tracking-widest animate-pulse">
                   Only {selectedSizeInfo.stock} Available
@@ -199,11 +216,32 @@ export function ProductDetail({ product }: ProductDetailProps) {
                   key={size.value}
                   disabled={size.stock === 0}
                   onClick={() => setSelectedSize(size.value)}
-                  className={`h-14 border-2 text-[10px] font-black transition-all ${size.stock === 0 ? "opacity-20 cursor-not-allowed bg-muted" : selectedSize === size.value ? "bg-foreground text-background border-foreground shadow-xl scale-105" : "bg-background text-foreground border-border hover:border-foreground"}`}
+                  className={`h-14 border-2 text-[10px] font-black transition-all rounded-xl ${size.stock === 0 ? "opacity-20 cursor-not-allowed bg-muted" : selectedSize === size.value ? "bg-foreground text-background border-foreground shadow-xl scale-105" : "bg-background text-foreground border-border hover:border-foreground"}`}
                 >
                   {size.value}
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div className="mb-10">
+            <p className="text-[10px] font-black tracking-widest uppercase mb-4">Quantity</p>
+            <div className="flex items-center w-36 border-2 border-border rounded-xl overflow-hidden bg-background">
+              <button
+                type="button"
+                onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                className="p-4 hover:bg-muted transition-colors border-r border-border"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <span className="flex-1 text-center font-black text-sm">{quantity}</span>
+              <button
+                type="button"
+                onClick={() => setQuantity(prev => Math.min(selectedSizeInfo?.stock || 50, prev + 1))}
+                className="p-4 hover:bg-muted transition-colors border-l border-border"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
@@ -212,7 +250,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
               disabled={isAdding}
               onClick={() => handleAddToCart(false)}
               size="lg"
-              className="w-full h-16 text-[11px] font-black tracking-[0.25em] uppercase rounded-none shadow-2xl transition-all"
+              className="w-full h-16 text-[11px] font-black tracking-[0.25em] uppercase rounded-xl shadow-2xl transition-all"
             >
               {isAdding ? <Loader2 className="w-5 h-5 animate-spin" /> : "ADD TO SHOPPING BAG"}
             </Button>
@@ -220,7 +258,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
               onClick={() => handleAddToCart(true)}
               variant="outline"
               size="lg"
-              className="w-full h-16 text-[11px] font-black tracking-[0.25em] uppercase rounded-none border-2 border-foreground hover:bg-foreground hover:text-background transition-all shadow-lg"
+              className="w-full h-16 text-[11px] font-black tracking-[0.25em] uppercase rounded-xl border-2 border-foreground hover:bg-foreground hover:text-background transition-all shadow-lg"
             >
               BUY IT NOW
             </Button>
@@ -269,6 +307,31 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
       <ProductReviews productId={product._id} />
       <ProductRecommendations />
+
+      {/* Size Chart Modal */}
+      {showSizeChart && product.sizeChart && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSizeChart(false)} />
+          <div className="relative bg-white p-2 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in-95 duration-300">
+            <button
+              onClick={() => setShowSizeChart(false)}
+              className="absolute top-4 right-4 bg-white/80 p-2 rounded-full hover:bg-white transition-colors z-10"
+            >
+              <X className="w-5 h-5 text-foreground" />
+            </button>
+            <h3 className="text-xl font-black uppercase tracking-tight text-center py-4">
+              {product.category.includes("Men") ? "Men's" : product.category.includes("Women") ? "Women's" : "Footwear"} Size Chart
+            </h3>
+            <div className="relative aspect-[3/4] w-full">
+              <img
+                src={product.sizeChart}
+                alt={`${product.name} Size Chart`}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

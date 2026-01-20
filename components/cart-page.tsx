@@ -10,7 +10,6 @@ import { useRouter } from "next/navigation"
 
 export function CartPage() {
     const [cartItems, setCartItems] = useState<any[]>([])
-    const [shippingCost, setShippingCost] = useState<number>(250)
     const router = useRouter()
 
     useEffect(() => {
@@ -21,22 +20,9 @@ export function CartPage() {
             }
         }
         loadCart()
-        fetchSettings()
         window.addEventListener("storage", loadCart)
         return () => window.removeEventListener("storage", loadCart)
     }, [])
-
-    const fetchSettings = async () => {
-        try {
-            const res = await fetch("/api/settings")
-            const data = await res.json()
-            if (data.shippingCost !== undefined) {
-                setShippingCost(data.shippingCost)
-            }
-        } catch (error) {
-            console.error("Failed to fetch settings")
-        }
-    }
 
     const saveCart = (newCart: any[]) => {
         setCartItems(newCart)
@@ -59,8 +45,8 @@ export function CartPage() {
     }
 
     const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
-    const shipping = subtotal > 5000 ? 0 : shippingCost
-    const total = subtotal + shipping
+    const shipping = 0
+    const total = subtotal
 
     if (cartItems.length === 0) {
         return (
@@ -157,7 +143,7 @@ export function CartPage() {
                             </div>
                             <div className="flex justify-between text-xs font-bold uppercase tracking-widest opacity-70">
                                 <span>Flat Shipping</span>
-                                <span>{shipping === 0 ? "FREE" : `PKR ${shipping.toLocaleString()}`}</span>
+                                <span>FREE</span>
                             </div>
                             <div className="pt-6 border-t border-background/20 flex justify-between items-baseline">
                                 <span className="text-base font-black uppercase tracking-widest">Total</span>

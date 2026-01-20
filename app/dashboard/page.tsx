@@ -18,7 +18,9 @@ import {
     Eye,
     ChevronRight,
     Lock,
-    Mail
+    Mail,
+    Hash,
+    MoveVertical
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
@@ -27,13 +29,19 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
-const categories = ["Sneakers", "Loafers", "Sandals", "Slides", "Sports Shoes", "Formal"]
+const FALLBACK_CATEGORIES = ["Sneakers", "Loafers", "Sandals", "Slides", "Sports Shoes", "Formal"]
 
 export default function DashboardPage() {
-    const [activeTab, setActiveTab] = useState<"products" | "orders" | "settings" | "newsletter">("products")
+    const [activeTab, setActiveTab] = useState<"products" | "orders"
+        | "newsletter"
+        | "slider"
+        | "categories"
+        | "settings"
+    >("products")
     const [isAddingProduct, setIsAddingProduct] = useState(false)
     const [editingProduct, setEditingProduct] = useState<any>(null)
     const [products, setProducts] = useState<any[]>([])
+    const [dynamicCategories, setDynamicCategories] = useState<any[]>([])
     const [orders, setOrders] = useState<any[]>([])
     const [subscribers, setSubscribers] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
@@ -51,6 +59,7 @@ export default function DashboardPage() {
 
     useEffect(() => {
         checkAuth()
+        fetchDynamicCategories()
     }, [])
 
     const checkAuth = async () => {
@@ -69,6 +78,16 @@ export default function DashboardPage() {
         } catch (error) {
             console.error("Dashboard: Auth check failed:", error);
             router.push("/login")
+        }
+    }
+
+    const fetchDynamicCategories = async () => {
+        try {
+            const res = await fetch("/api/admin/categories")
+            const data = await res.json()
+            setDynamicCategories(data)
+        } catch (error) {
+            console.error("Failed to fetch categories")
         }
     }
 
@@ -189,12 +208,11 @@ export default function DashboardPage() {
                         Orders
                     </button>
                     <button
-                        onClick={() => setActiveTab("settings")}
-                        className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-bold uppercase tracking-widest transition-all ${activeTab === "settings" ? "bg-foreground text-background" : "hover:bg-muted"
-                            }`}
+                        onClick={() => setActiveTab("categories")}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-bold uppercase tracking-widest transition-all ${activeTab === "categories" ? "bg-foreground text-background" : "hover:bg-muted"}`}
                     >
-                        <Settings className="w-4 h-4" />
-                        Settings
+                        <Hash className="w-4 h-4" />
+                        Categories
                     </button>
                     <button
                         onClick={() => setActiveTab("newsletter")}
@@ -203,6 +221,22 @@ export default function DashboardPage() {
                     >
                         <Mail className="w-4 h-4" />
                         Newsletter
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("slider")}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-bold uppercase tracking-widest transition-all ${activeTab === "slider" ? "bg-foreground text-background" : "hover:bg-muted"
+                            }`}
+                    >
+                        <ImageIcon className="w-4 h-4" />
+                        Slider
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("settings")}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-bold uppercase tracking-widest transition-all ${activeTab === "settings" ? "bg-foreground text-background" : "hover:bg-muted"
+                            }`}
+                    >
+                        <Settings className="w-4 h-4" />
+                        Settings
                     </button>
                 </nav>
 
@@ -231,7 +265,7 @@ export default function DashboardPage() {
                     <div className="flex justify-between items-center mb-10">
                         <div>
                             <h2 className="text-3xl font-black uppercase tracking-tight">
-                                {activeTab === "products" ? "Inventory" : activeTab === "orders" ? "Orders" : activeTab === "newsletter" ? "Newsletter Subscribers" : "Security Settings"}
+                                {activeTab === "products" ? "Inventory" : activeTab === "orders" ? "Orders" : activeTab === "newsletter" ? "Newsletter Subscribers" : activeTab === "slider" ? "Slider Management" : activeTab === "categories" ? "Collection Categories" : "Security Settings"}
                             </h2>
                             <div className="flex items-center gap-6 mt-1">
                                 <p className="text-sm text-muted-foreground">
@@ -241,8 +275,18 @@ export default function DashboardPage() {
                                             ? `Managing ${orders.length} customer purchases`
                                             : activeTab === "newsletter"
                                                 ? `Managing ${subscribers.length} total subscribers`
-                                                : "Manage administrative credentials and security"}
+                                                : activeTab === "slider"
+                                                    ? "Manage homepage background slider images"
+                                                    : activeTab === "categories"
+                                                        ? "Manage product categories for your store"
+                                                        : "Manage administrative credentials and security"}
                                 </p>
+                                {activeTab === "products" && (
+                                    <div className="flex items-center gap-2 border-l border-border pl-6">
+                                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                        <p className="text-[10px] font-black uppercase tracking-widest">{dynamicCategories.length || FALLBACK_CATEGORIES.length} Categories Available</p>
+                                    </div>
+                                )}
                                 {activeTab === "products" && (
                                     <div className="flex items-center gap-2 border-l border-border pl-6">
                                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Per Page:</span>
@@ -316,7 +360,7 @@ export default function DashboardPage() {
                         )}
                     </div>
 
-                    {loading && activeTab !== "settings" ? (
+                    {loading && activeTab !== "settings" && activeTab !== "categories" ? (
                         <div className="flex flex-col items-center justify-center py-20 bg-white border border-border dashed">
                             <Loader2 className="w-10 h-10 animate-spin text-muted-foreground mb-4" />
                             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Loading dashboard data...</p>
@@ -624,6 +668,10 @@ export default function DashboardPage() {
                                 </div>
                             )}
                         </div>
+                    ) : activeTab === "slider" ? (
+                        <SliderManager />
+                    ) : activeTab === "categories" ? (
+                        <CategoryManager />
                     ) : (
                         <AdminSettings />
                     )}
@@ -657,6 +705,7 @@ export default function DashboardPage() {
                                     setEditingProduct(null)
                                     fetchData()
                                 }}
+                                dynamicCategories={dynamicCategories}
                             />
                         </div>
                     </div>
@@ -670,24 +719,6 @@ export default function DashboardPage() {
 function AdminSettings() {
     const [loading, setLoading] = useState(false)
     const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" })
-    const [shippingCost, setShippingCost] = useState<number>(250)
-    const [updatingShipping, setUpdatingShipping] = useState(false)
-
-    useEffect(() => {
-        fetchSettings()
-    }, [])
-
-    const fetchSettings = async () => {
-        try {
-            const res = await fetch("/api/settings")
-            const data = await res.json()
-            if (data.shippingCost) {
-                setShippingCost(data.shippingCost)
-            }
-        } catch (error) {
-            console.error("Failed to fetch settings")
-        }
-    }
 
     const handlePasswordUpdate = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -716,29 +747,8 @@ function AdminSettings() {
         }
     }
 
-    const handleShippingUpdate = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setUpdatingShipping(true)
-        try {
-            const res = await fetch("/api/settings", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ key: "shippingCost", value: shippingCost })
-            })
-            if (res.ok) {
-                toast.success("Global shipping cost updated")
-            } else {
-                toast.error("Failed to update shipping cost")
-            }
-        } catch (error) {
-            toast.error("An error occurred")
-        } finally {
-            setUpdatingShipping(false)
-        }
-    }
-
     return (
-        <div className="grid md:grid-cols-2 gap-8 items-start">
+        <div className="max-w-xl">
             <div className="bg-white border border-border p-10 shadow-sm">
                 <div className="flex items-center gap-4 mb-8">
                     <div className="p-3 bg-foreground text-background">
@@ -782,41 +792,16 @@ function AdminSettings() {
                     </Button>
                 </form>
             </div>
-
-            <div className="bg-white border border-border p-10 shadow-sm">
-                <div className="flex items-center gap-4 mb-8">
-                    <div className="p-3 bg-foreground text-background">
-                        <Settings className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-xl font-black uppercase tracking-tight">Global Rules</h3>
-                </div>
-                <form onSubmit={handleShippingUpdate} className="space-y-8">
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block">Global Shipping Cost (PKR)</label>
-                        <input
-                            type="number"
-                            required
-                            className="w-full text-3xl font-black border-b-2 border-border focus:border-foreground focus:outline-none py-2"
-                            value={shippingCost}
-                            onChange={e => setShippingCost(parseInt(e.target.value) || 0)}
-                        />
-                        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">
-                            * This value determines the shipping charge for all orders.
-                        </p>
-                    </div>
-                    <Button disabled={updatingShipping} className="w-full rounded-none h-14 font-black tracking-widest uppercase">
-                        {updatingShipping ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Global Settings"}
-                    </Button>
-                </form>
-            </div>
         </div>
     )
 }
 
-function ProductForm({ initialData, onSuccess }: { initialData?: any, onSuccess: () => void }) {
+function ProductForm({ initialData, onSuccess, dynamicCategories = [] }: { initialData?: any, onSuccess: () => void, dynamicCategories?: any[] }) {
     const [loading, setLoading] = useState(false)
     const [images, setImages] = useState<File[]>([])
     const [previewUrls, setPreviewUrls] = useState<string[]>(initialData?.images || [])
+    const [sizeChartFile, setSizeChartFile] = useState<File | null>(null)
+    const [sizeChartPreview, setSizeChartPreview] = useState<string | null>(initialData?.sizeChart || null)
     const [sizes, setSizes] = useState<any[]>(initialData?.sizes || [
         { value: "39", stock: 10 },
         { value: "40", stock: 10 },
@@ -847,6 +832,14 @@ function ProductForm({ initialData, onSuccess }: { initialData?: any, onSuccess:
             setImages(prev => [...prev, ...filesArr])
             const urls = filesArr.map(file => URL.createObjectURL(file))
             setPreviewUrls(prev => [...prev, ...urls])
+        }
+    }
+
+    const handleSizeChartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            setSizeChartFile(file)
+            setSizeChartPreview(URL.createObjectURL(file))
         }
     }
 
@@ -900,7 +893,9 @@ function ProductForm({ initialData, onSuccess }: { initialData?: any, onSuccess:
             formData.append("category", data.category)
             formData.append("articleCode", data.articleCode)
             formData.append("colors", JSON.stringify(colors))
+            formData.append("colors", JSON.stringify(colors))
             formData.append("sizes", JSON.stringify(sizes))
+            if (sizeChartFile) formData.append("sizeChart", sizeChartFile)
 
             if (initialData) {
                 const existingRemaining = previewUrls.filter(url => !url.startsWith("blob:"))
@@ -947,7 +942,9 @@ function ProductForm({ initialData, onSuccess }: { initialData?: any, onSuccess:
                         {...register("category", { required: true })}
                         className="w-full border border-border px-4 py-3 text-sm focus:outline-none focus:border-foreground bg-white"
                     >
-                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                        {(dynamicCategories.length > 0 ? dynamicCategories.map(c => c.name) : FALLBACK_CATEGORIES).map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
                     </select>
                 </div>
             </div>
@@ -1057,6 +1054,33 @@ function ProductForm({ initialData, onSuccess }: { initialData?: any, onSuccess:
                 </div>
             </div>
 
+            <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-widest block">Size Chart</label>
+                <div className="flex items-start gap-4">
+                    {sizeChartPreview ? (
+                        <div className="relative w-32 h-32 border border-border bg-muted">
+                            <Image src={sizeChartPreview} alt="Size Chart" fill className="object-cover" />
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSizeChartFile(null)
+                                    setSizeChartPreview(null)
+                                }}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600 transition-colors"
+                            >
+                                <X className="w-3 h-3" />
+                            </button>
+                        </div>
+                    ) : (
+                        <label className="w-32 h-32 border-2 border-dashed border-muted flex flex-col items-center justify-center cursor-pointer hover:border-foreground transition-colors bg-muted/5">
+                            <Plus className="w-6 h-6 text-muted-foreground mb-2" />
+                            <span className="text-[9px] font-black uppercase text-muted-foreground">Upload Image</span>
+                            <input type="file" className="hidden" onChange={handleSizeChartChange} accept="image/*" />
+                        </label>
+                    )}
+                </div>
+            </div>
+
             <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest">Description</label>
                 <textarea
@@ -1089,3 +1113,352 @@ function ProductForm({ initialData, onSuccess }: { initialData?: any, onSuccess:
     )
 }
 
+function SliderManager() {
+    const [sliders, setSliders] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+    const [uploading, setUploading] = useState(false)
+
+    useEffect(() => {
+        fetchSliders()
+    }, [])
+
+    const fetchSliders = async () => {
+        setLoading(true)
+        try {
+            const res = await fetch("/api/admin/slider")
+            const data = await res.json()
+            setSliders(data)
+        } catch (error) {
+            toast.error("Failed to fetch sliders")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setUploading(true)
+        const formData = new FormData()
+        formData.append("image", file)
+
+        try {
+            const res = await fetch("/api/admin/slider", {
+                method: "POST",
+                body: formData,
+            })
+            if (res.ok) {
+                toast.success("Image uploaded successfully")
+                fetchSliders()
+            } else {
+                const data = await res.json()
+                toast.error(data.error || "Upload failed")
+            }
+        } catch (error) {
+            toast.error("Upload failed")
+        } finally {
+            setUploading(false)
+        }
+    }
+
+    const handleDelete = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this image?")) return
+
+        try {
+            const res = await fetch(`/api/admin/slider/${id}`, {
+                method: "DELETE",
+            })
+            if (res.ok) {
+                toast.success("Image deleted")
+                fetchSliders()
+            }
+        } catch (error) {
+            toast.error("Delete failed")
+        }
+    }
+
+    const moveSlider = async (index: number, direction: "up" | "down") => {
+        const newSliders = [...sliders]
+        const targetIndex = direction === "up" ? index - 1 : index + 1
+        if (targetIndex < 0 || targetIndex >= newSliders.length) return
+
+        const item = newSliders.splice(index, 1)[0]
+        newSliders.splice(targetIndex, 0, item)
+
+        // Update orders locally
+        const updatedSliders = newSliders.map((s, i) => ({ ...s, order: i }))
+        setSliders(updatedSliders)
+
+        // Save to DB
+        try {
+            await fetch("/api/admin/slider", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sliders: updatedSliders }),
+            })
+            toast.success("Order updated")
+        } catch (error) {
+            toast.error("Failed to update order")
+            fetchSliders()
+        }
+    }
+
+    return (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="bg-white border border-border p-8 mb-8">
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 className="text-xl font-black uppercase tracking-tight">Upload New Slide</h3>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+                            Recommended: High resolution landscape images
+                        </p>
+                    </div>
+                    <label className="cursor-pointer">
+                        <div className="bg-foreground text-background px-8 h-12 flex items-center gap-2 font-black text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-all">
+                            {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                            {uploading ? "Uploading..." : "Add New Image"}
+                        </div>
+                        <input type="file" className="hidden" onChange={handleUpload} accept="image/*" disabled={uploading} />
+                    </label>
+                </div>
+            </div>
+
+            <div className="bg-white border border-border">
+                <table className="w-full text-left order-collapse">
+                    <thead>
+                        <tr className="border-b-2 border-border bg-muted/30">
+                            <th className="p-8 text-[11px] font-black uppercase tracking-[0.25em] text-muted-foreground">Preview</th>
+                            <th className="p-8 text-[11px] font-black uppercase tracking-[0.25em] text-muted-foreground text-center">Order</th>
+                            <th className="p-8 text-[11px] font-black uppercase tracking-[0.25em] text-muted-foreground text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/60">
+                        {loading ? (
+                            <tr>
+                                <td colSpan={3} className="p-16 text-center">
+                                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
+                                </td>
+                            </tr>
+                        ) : sliders.length === 0 ? (
+                            <tr>
+                                <td colSpan={3} className="p-16 text-center text-muted-foreground">
+                                    <ImageIcon className="w-12 h-12 mx-auto mb-4 opacity-10" />
+                                    <p className="text-xs font-black uppercase tracking-widest">No slider images found</p>
+                                </td>
+                            </tr>
+                        ) : (
+                            sliders.map((slider, index) => (
+                                <tr key={slider._id} className="hover:bg-muted/10 transition-all">
+                                    <td className="p-8">
+                                        <div className="relative w-40 h-24 border border-border bg-muted overflow-hidden group">
+                                            <Image src={slider.imageUrl} alt="Slider" fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                                        </div>
+                                    </td>
+                                    <td className="p-8 text-center">
+                                        <div className="flex items-center justify-center gap-4">
+                                            <button
+                                                onClick={() => moveSlider(index, "up")}
+                                                disabled={index === 0}
+                                                className="p-2 border border-border hover:bg-muted disabled:opacity-20"
+                                            >
+                                                <ChevronRight className="w-4 h-4 -rotate-90" />
+                                            </button>
+                                            <span className="text-sm font-black w-6">{slider.order + 1}</span>
+                                            <button
+                                                onClick={() => moveSlider(index, "down")}
+                                                disabled={index === sliders.length - 1}
+                                                className="p-2 border border-border hover:bg-muted disabled:opacity-20"
+                                            >
+                                                <ChevronRight className="w-4 h-4 rotate-90" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td className="p-8 text-right">
+                                        <button
+                                            onClick={() => handleDelete(slider._id)}
+                                            className="p-4 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    )
+}
+
+function CategoryManager() {
+    const [categories, setCategories] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+    const [newCategory, setNewCategory] = useState("")
+    const [isAdding, setIsAdding] = useState(false)
+
+    useEffect(() => {
+        fetchCategories()
+    }, [])
+
+    const fetchCategories = async () => {
+        try {
+            const res = await fetch("/api/admin/categories")
+            const data = await res.json()
+            setCategories(data)
+        } catch (error) {
+            toast.error("Failed to fetch categories")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleAdd = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!newCategory.trim()) return
+        setIsAdding(true)
+        try {
+            const res = await fetch("/api/admin/categories", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: newCategory })
+            })
+            if (res.ok) {
+                toast.success("Category added successfully")
+                setNewCategory("")
+                fetchCategories()
+            } else {
+                toast.error("Failed to add category")
+            }
+        } catch (error) {
+            toast.error("An error occurred")
+        } finally {
+            setIsAdding(false)
+        }
+    }
+
+    const handleDelete = async (id: string) => {
+        if (!confirm("Are you sure? This will not delete products in this category but will remove the filter.")) return
+        try {
+            const res = await fetch(`/api/admin/categories/${id}`, { method: "DELETE" })
+            if (res.ok) {
+                toast.success("Category deleted")
+                fetchCategories()
+            }
+        } catch (error) {
+            toast.error("Failed to delete category")
+        }
+    }
+
+    const moveCategory = async (index: number, direction: "up" | "down") => {
+        const newCategories = [...categories]
+        const targetIndex = direction === "up" ? index - 1 : index + 1
+        if (targetIndex < 0 || targetIndex >= categories.length) return
+
+        [newCategories[index], newCategories[targetIndex]] = [newCategories[targetIndex], newCategories[index]]
+
+        // Update orders
+        const updatedWithOrders = newCategories.map((cat, i) => ({ ...cat, order: i }))
+        setCategories(updatedWithOrders)
+
+        try {
+            await fetch("/api/admin/categories", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ categories: updatedWithOrders })
+            })
+        } catch (error) {
+            toast.error("Failed to update order")
+            fetchCategories()
+        }
+    }
+
+    return (
+        <div className="space-y-8">
+            <div className="bg-white border border-border p-10 shadow-sm max-w-xl">
+                <h3 className="text-xl font-black uppercase tracking-tight mb-6">Add New Category</h3>
+                <form onSubmit={handleAdd} className="flex gap-4">
+                    <input
+                        type="text"
+                        placeholder="e.g. SNEAKERS"
+                        className="flex-1 border-b-2 border-border focus:border-foreground focus:outline-none py-2 font-bold uppercase tracking-widest text-sm"
+                        value={newCategory}
+                        onChange={e => setNewCategory(e.target.value)}
+                    />
+                    <Button disabled={isAdding} className="h-12 px-8 rounded-none font-black tracking-widest uppercase">
+                        {isAdding ? <Loader2 className="w-4 h-4 animate-spin" /> : "ADD"}
+                    </Button>
+                </form>
+            </div>
+
+            <div className="bg-white border border-border mt-8 shadow-sm overflow-hidden">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="border-b border-border bg-muted/50">
+                            <th className="p-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Order</th>
+                            <th className="p-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Category Name</th>
+                            <th className="p-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {loading ? (
+                            <tr>
+                                <td colSpan={3} className="p-20 text-center">
+                                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Fetching categories...</p>
+                                </td>
+                            </tr>
+                        ) : categories.length === 0 ? (
+                            <tr>
+                                <td colSpan={3} className="p-20 text-center">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">No categories found</p>
+                                </td>
+                            </tr>
+                        ) : (
+                            categories.map((category, index) => (
+                                <tr key={category._id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                                    <td className="p-6 w-32">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex flex-col gap-1">
+                                                <button
+                                                    onClick={() => moveCategory(index, "up")}
+                                                    disabled={index === 0}
+                                                    className="p-2 border border-border hover:bg-muted disabled:opacity-20"
+                                                >
+                                                    <ChevronRight className="w-4 h-4 -rotate-90" />
+                                                </button>
+                                                <button
+                                                    onClick={() => moveCategory(index, "down")}
+                                                    disabled={index === categories.length - 1}
+                                                    className="p-2 border border-border hover:bg-muted disabled:opacity-20"
+                                                >
+                                                    <ChevronRight className="w-4 h-4 rotate-90" />
+                                                </button>
+                                            </div>
+                                            <span className="text-sm font-black">{category.order + 1}</span>
+                                        </div>
+                                    </td>
+                                    <td className="p-6">
+                                        <div className="flex items-center gap-3">
+                                            <Hash className="w-4 h-4 text-muted-foreground" />
+                                            <span className="font-black uppercase tracking-widest text-sm">{category.name}</span>
+                                        </div>
+                                    </td>
+                                    <td className="p-6 text-right">
+                                        <button
+                                            onClick={() => handleDelete(category._id)}
+                                            className="p-4 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    )
+}

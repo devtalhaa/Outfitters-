@@ -80,7 +80,7 @@ export function ProductRecommendations() {
                         href={`/product/${product.slug}`}
                         className="group flex-shrink-0 w-[200px] lg:w-[280px] snap-start"
                     >
-                        <div className="aspect-[4/5] bg-[#f5f5f5] relative overflow-hidden mb-3">
+                        <div className="aspect-[4/5] bg-[#f5f5f5] relative overflow-hidden mb-3 rounded-2xl">
                             <Image
                                 src={product.images[0] || "/placeholder.svg"}
                                 alt={product.name}

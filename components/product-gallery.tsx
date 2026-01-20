@@ -30,7 +30,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
                         key={index}
                         onClick={() => setSelectedImage(index)}
                         className={cn(
-                            "relative flex-shrink-0 w-20 h-24 bg-[#f5f5f5] border-2 transition-all duration-200",
+                            "relative flex-shrink-0 w-20 h-24 bg-[#f5f5f5] border-2 transition-all duration-200 rounded-lg overflow-hidden",
                             selectedImage === index ? "border-foreground" : "border-transparent hover:border-border"
                         )}
                     >
@@ -46,7 +46,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
 
             {/* Main Image */}
             <div
-                className="relative flex-1 aspect-[4/5] bg-[#f5f5f5] cursor-zoom-in overflow-hidden group"
+                className="relative flex-1 aspect-[4/5] bg-[#f5f5f5] cursor-zoom-in overflow-hidden group rounded-2xl"
                 onMouseEnter={() => setIsZoomed(true)}
                 onMouseLeave={() => setIsZoomed(false)}
                 onMouseMove={handleMouseMove}
@@ -68,7 +68,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
                 {/* Zoom Hint */}
                 {!isZoomed && (
                     <div className="absolute inset-x-0 bottom-4 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="bg-background/80 backdrop-blur-sm text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 shadow-sm">
+                        <span className="bg-background/80 backdrop-blur-sm text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 shadow-sm rounded-full">
                             Roll over to zoom
                         </span>
                     </div>

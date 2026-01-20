@@ -1,48 +1,33 @@
-"use client"
+import dbConnect from "@/lib/mongodb"
+import Slider from "@/lib/models/Slider"
+import Category from "@/lib/models/Category"
+import { HomeLayout } from "@/components/home-layout"
 
-import { useState } from "react"
-import { Header } from "@/components/header"
-import { AnnouncementBar } from "@/components/announcement-bar"
-import { CollectionHero } from "@/components/collection-hero"
-import { FilterBar } from "@/components/filter-bar"
-import { ProductGrid } from "@/components/product-grid"
-import { Footer } from "@/components/footer"
+export default async function HomePage() {
+  await dbConnect()
 
-export default function HomePage() {
-  const [filters, setFilters] = useState({
-    category: "All Footwear",
-    size: "",
-    color: "",
-    minPrice: "",
-    maxPrice: "",
-    sort: "newest",
-    view: "grid" as "grid" | "list"
-  })
+  // Fetch sliders directly from DB for immediate loading
+  const sliderDocs = await Slider.find({ isActive: true }).sort({ order: 1 })
 
-  const updateFilters = (newFilters: Partial<typeof filters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }))
-  }
+  // Serialize for Client Component
+  const initialSliders = sliderDocs.map(doc => ({
+    _id: doc._id.toString(),
+    imageUrl: doc.imageUrl,
+    order: doc.order,
+    publicId: doc.publicId,
+    isActive: doc.isActive
+  }))
 
-  return (
-    <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
-      <Header />
-      <main className="flex-1">
-        <CollectionHero
-          activeCategory={filters.category}
-          onCategoryChange={(cat) => updateFilters({ category: cat })}
-        />
-        <FilterBar
-          filters={filters}
-          updateFilters={updateFilters}
-          activeCategory={filters.category}
-          onCategoryChange={(cat) => updateFilters({ category: cat })}
-        />
-        <ProductGrid
-          filters={filters}
-        />
-      </main>
-      <Footer />
-    </div>
-  )
+  // Fetch categories
+  const categoryDocs = await Category.find({ isActive: true }).sort({ order: 1 })
+
+  // Serialize categories
+  const initialCategories = categoryDocs.map(doc => ({
+    _id: doc._id.toString(),
+    name: doc.name,
+    slug: doc.slug,
+    order: doc.order
+  }))
+
+  return <HomeLayout initialSliders={initialSliders} initialCategories={initialCategories} />
 }

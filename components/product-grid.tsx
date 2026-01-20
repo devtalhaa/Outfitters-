@@ -215,8 +215,8 @@ function ProductCard({ product, view }: { product: any; view: string }) {
 
   if (view === "list") {
     return (
-      <div className="flex flex-col md:flex-row gap-6 border border-border p-4 group bg-white hover:border-foreground transition-all duration-300">
-        <Link href={`/product/${product.slug}`} className="relative w-full md:w-64 aspect-[4/5] bg-muted overflow-hidden">
+      <div className="flex flex-col md:flex-row gap-6 border border-border p-4 group bg-white hover:border-foreground transition-all duration-300 rounded-2xl">
+        <Link href={`/product/${product.slug}`} className="relative w-full md:w-64 aspect-[4/5] bg-muted overflow-hidden rounded-xl">
           <Image
             src={product.images[0]}
             alt={product.name}
@@ -224,7 +224,7 @@ function ProductCard({ product, view }: { product: any; view: string }) {
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
           {discount > 0 && (
-            <span className="absolute top-3 left-3 px-2 py-1 text-[9px] font-black bg-red-500 text-white uppercase tracking-[0.2em] shadow-lg">
+            <span className="absolute top-3 left-3 px-2 py-1 text-[9px] font-black bg-red-500 text-white uppercase tracking-[0.2em] shadow-lg rounded-full">
               -{discount}% OFF
             </span>
           )}
@@ -252,9 +252,9 @@ function ProductCard({ product, view }: { product: any; view: string }) {
                       key={color.name}
                       onClick={() => setSelectedColor(color.name)}
                       title={color.name}
-                      className={`w-10 h-10 border-2 transition-all p-0.5 ${selectedColor === color.name ? "border-foreground shadow-md scale-110" : "border-transparent hover:border-border"}`}
+                      className={`w-10 h-10 border-2 transition-all p-0.5 rounded-full ${selectedColor === color.name ? "border-foreground shadow-md scale-110" : "border-transparent hover:border-border"}`}
                     >
-                      <div className="w-full h-full" style={{ backgroundColor: color.value }} />
+                      <div className="w-full h-full rounded-full" style={{ backgroundColor: color.value }} />
                     </button>
                   ))}
                 </div>
@@ -266,7 +266,7 @@ function ProductCard({ product, view }: { product: any; view: string }) {
                     <button
                       key={size.value}
                       onClick={() => setSelectedSize(size.value)}
-                      className={`w-12 h-12 flex items-center justify-center text-[10px] font-black border transition-all ${selectedSize === size.value ? "bg-foreground text-background border-foreground shadow-lg" : "border-border hover:border-foreground"}`}
+                      className={`w-12 h-12 flex items-center justify-center text-[10px] font-black border transition-all rounded-xl ${selectedSize === size.value ? "bg-foreground text-background border-foreground shadow-lg" : "border-border hover:border-foreground"}`}
                     >
                       {size.value}
                     </button>
@@ -277,10 +277,10 @@ function ProductCard({ product, view }: { product: any; view: string }) {
           </div>
 
           <div className="flex gap-4">
-            <Button onClick={handleAddToCart} className="flex-1 rounded-none h-14 font-black tracking-widest uppercase shadow-lg">
+            <Button onClick={handleAddToCart} className="flex-1 rounded-xl h-14 font-black tracking-widest uppercase shadow-lg">
               Add to Cart
             </Button>
-            <Button onClick={handleBuyNow} variant="outline" className="flex-1 rounded-none h-14 border-2 border-foreground font-black tracking-widest uppercase hover:bg-foreground hover:text-background transition-all">
+            <Button onClick={handleBuyNow} variant="outline" className="flex-1 rounded-xl h-14 border-2 border-foreground font-black tracking-widest uppercase hover:bg-foreground hover:text-background transition-all">
               Buy Now
             </Button>
           </div>
@@ -292,7 +292,7 @@ function ProductCard({ product, view }: { product: any; view: string }) {
   return (
     <div className="group relative" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
       {/* Image Container */}
-      <div className="relative aspect-[3/4] md:aspect-[4/5] overflow-hidden bg-muted mb-4 cursor-pointer" onClick={() => router.push(`/product/${product.slug}`)}>
+      <div className="relative aspect-[3/4] md:aspect-[4/5] overflow-hidden bg-muted mb-4 cursor-pointer rounded-2xl" onClick={() => router.push(`/product/${product.slug}`)}>
         <Image
           src={(isHovered && product.images[1]) ? product.images[1] : product.images[0]}
           alt={product.name}
@@ -303,12 +303,12 @@ function ProductCard({ product, view }: { product: any; view: string }) {
         {/* Badges */}
         <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
           {discount > 0 && (
-            <span className="px-3 py-1.5 text-[9px] font-black bg-red-500 text-white uppercase tracking-[0.2em] shadow-xl">
+            <span className="px-3 py-1.5 text-[9px] font-black bg-red-500 text-white uppercase tracking-[0.2em] shadow-xl rounded-full">
               -{discount}%
             </span>
           )}
           {product.category === "Sneakers" && (
-            <span className="px-3 py-1.5 text-[9px] font-black bg-foreground text-background uppercase tracking-[0.2em] shadow-xl">
+            <span className="px-3 py-1.5 text-[9px] font-black bg-foreground text-background uppercase tracking-[0.2em] shadow-xl rounded-full">
               Trend
             </span>
           )}
@@ -317,7 +317,7 @@ function ProductCard({ product, view }: { product: any; view: string }) {
         {/* Wishlist Button */}
         <button
           onClick={handleWishlist}
-          className="absolute top-4 right-4 p-2.5 bg-background shadow-xl hover:bg-foreground hover:text-background transition-all duration-300 z-20 group/wish"
+          className="absolute top-4 right-4 p-2.5 bg-background shadow-xl hover:bg-foreground hover:text-background transition-all duration-300 z-20 group/wish rounded-full"
         >
           <Heart className={`h-4 w-4 transition-transform group-hover/wish:scale-125 ${isWishlisted(product._id) ? "fill-red-500 text-red-500" : ""}`} />
         </button>
@@ -335,9 +335,9 @@ function ProductCard({ product, view }: { product: any; view: string }) {
                     setSelectedColor(color.name);
                   }}
                   title={color.name}
-                  className={`w-6 h-6 border-2 transition-all p-0.5 ${selectedColor === color.name ? "border-foreground shadow-md scale-110" : "border-transparent hover:border-border"}`}
+                  className={`w-6 h-6 border-2 transition-all p-0.5 rounded-full ${selectedColor === color.name ? "border-foreground shadow-md scale-110" : "border-transparent hover:border-border"}`}
                 >
-                  <div className="w-full h-full" style={{ backgroundColor: color.value }} />
+                  <div className="w-full h-full rounded-full" style={{ backgroundColor: color.value }} />
                 </button>
               ))}
             </div>
@@ -350,7 +350,7 @@ function ProductCard({ product, view }: { product: any; view: string }) {
                     e.stopPropagation();
                     setSelectedSize(size.value);
                   }}
-                  className={`min-w-[40px] h-10 px-2 text-[10px] font-black border transition-all ${selectedSize === size.value ? "bg-foreground text-background border-foreground shadow-lg" : "border-border hover:border-foreground"}`}
+                  className={`min-w-[40px] h-10 px-2 text-[10px] font-black border transition-all rounded-lg ${selectedSize === size.value ? "bg-foreground text-background border-foreground shadow-lg" : "border-border hover:border-foreground"}`}
                 >
                   {size.value}
                 </button>
@@ -358,7 +358,7 @@ function ProductCard({ product, view }: { product: any; view: string }) {
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <Button onClick={handleAddToCart} className="w-full rounded-none h-12 text-[10px] font-black uppercase tracking-widest shadow-xl">
+            <Button onClick={handleAddToCart} className="w-full rounded-xl h-12 text-[10px] font-black uppercase tracking-widest shadow-xl">
               Add to Cart
             </Button>
             <button onClick={handleBuyNow} className="w-full text-center py-2 text-[9px] font-black uppercase tracking-widest hover:underline transition-all">

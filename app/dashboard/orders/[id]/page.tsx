@@ -29,14 +29,13 @@ export default function OrderPage({ params }: PageProps) {
     const [order, setOrder] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [updating, setUpdating] = useState(false)
-    const [globalShipping, setGlobalShipping] = useState<number>(250)
+    const [globalShipping, setGlobalShipping] = useState<number>(0)
     const router = useRouter()
 
     const statuses = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"]
 
     useEffect(() => {
         fetchOrder()
-        fetchSettings()
     }, [id])
 
     const fetchOrder = async () => {
@@ -53,17 +52,6 @@ export default function OrderPage({ params }: PageProps) {
         }
     }
 
-    const fetchSettings = async () => {
-        try {
-            const res = await fetch("/api/settings")
-            const data = await res.json()
-            if (data.shippingCost) {
-                setGlobalShipping(data.shippingCost)
-            }
-        } catch (error) {
-            console.error("Failed to fetch settings")
-        }
-    }
 
     const handleStatusUpdate = async (newStatus: string) => {
         setUpdating(true)
@@ -252,7 +240,7 @@ export default function OrderPage({ params }: PageProps) {
                                 </div>
                                 <div className="flex justify-between text-sm opacity-80">
                                     <span>Shipping Cost</span>
-                                    <span className="font-bold">PKR {globalShipping.toLocaleString()}</span>
+                                    <span className="font-bold">{globalShipping === 0 ? "FREE" : `PKR ${globalShipping.toLocaleString()}`}</span>
                                 </div>
                                 <div className="pt-6 mt-6 border-t border-white/20 flex justify-between items-end">
                                     <span className="text-xs font-black uppercase tracking-[0.2em]">Total Amount</span>

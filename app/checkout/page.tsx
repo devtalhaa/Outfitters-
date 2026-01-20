@@ -17,7 +17,6 @@ export default function CheckoutPage() {
     const [loading, setLoading] = useState(false)
     const [orderComplete, setOrderComplete] = useState<any>(null)
     const [paymentMethod, setPaymentMethod] = useState<"COD" | "Card">("COD")
-    const [shippingCost, setShippingCost] = useState<number>(250)
     const router = useRouter()
 
     useEffect(() => {
@@ -27,24 +26,11 @@ export default function CheckoutPage() {
         } else {
             router.push("/")
         }
-        fetchSettings()
     }, [])
 
-    const fetchSettings = async () => {
-        try {
-            const res = await fetch("/api/settings")
-            const data = await res.json()
-            if (data.shippingCost !== undefined) {
-                setShippingCost(data.shippingCost)
-            }
-        } catch (error) {
-            console.error("Failed to fetch settings")
-        }
-    }
-
     const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
-    const shipping = subtotal > 5000 ? 0 : shippingCost
-    const total = subtotal + shipping
+    const shipping = 0
+    const total = subtotal
 
     const { register, handleSubmit } = useForm()
 
@@ -248,7 +234,7 @@ export default function CheckoutPage() {
                                 </div>
                                 <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                     <span>Shipping</span>
-                                    <span>{shipping === 0 ? "FREE" : `PKR ${shipping.toLocaleString()}`}</span>
+                                    <span>FREE</span>
                                 </div>
                                 <div className="pt-6 border-t border-border flex justify-between items-baseline">
                                     <span className="text-sm font-black uppercase tracking-widest">Grand Total</span>

@@ -47,6 +47,22 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
             updateData.images = imageUrls;
         }
 
+        if (formData.has("sizeChart")) {
+            const sizeChartFile = formData.get("sizeChart") as File;
+            const arrayBuffer = await sizeChartFile.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            const uploadResponse: any = await new Promise((resolve, reject) => {
+                cloudinary.uploader.upload_stream(
+                    { folder: "outfitters/size-charts" },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                ).end(buffer);
+            });
+            updateData.sizeChart = uploadResponse.secure_url;
+        }
+
         const product = await Product.findByIdAndUpdate(id, updateData, { new: true });
 
         if (!product) {

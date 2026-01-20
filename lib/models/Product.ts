@@ -12,6 +12,7 @@ export interface IProduct extends Document {
     category: string;
     composition?: string;
     care?: string;
+    sizeChart?: string;
     articleCode: string;
     createdAt: Date;
 }
@@ -43,6 +44,7 @@ const ProductSchema: Schema = new Schema(
         },
         composition: { type: String },
         care: { type: String },
+        sizeChart: { type: String },
         articleCode: { type: String, required: true },
     },
     { timestamps: true }

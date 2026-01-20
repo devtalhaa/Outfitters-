@@ -21,18 +21,20 @@ interface FilterBarProps {
   updateFilters: (newFilters: any) => void
   activeCategory: string
   onCategoryChange: (category: string) => void
+  categories?: any[]
 }
 
-export function FilterBar({ filters, updateFilters, activeCategory, onCategoryChange }: FilterBarProps) {
+export function FilterBar({ filters, updateFilters, activeCategory, onCategoryChange, categories = [] }: FilterBarProps) {
   const activeFiltersCount = (filters.size ? 1 : 0) + (filters.color ? 1 : 0) + (filters.minPrice || filters.maxPrice ? 1 : 0)
-  const categories = ["All Footwear", "Sneakers", "Loafers", "Sandals", "Slides", "Sports Shoes", "Formal"]
+
+  const categoryNames = ["All Footwear", ...categories.map(c => c.name)]
 
   return (
     <div className=" top-16 lg:top-20 z-40 bg-background border-b border-border shadow-sm">
       <div className="container mx-auto px-4 py-4">
         {/* Category Filter Buttons */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {categories.map((category) => (
+          {categoryNames.map((category) => (
             <button
               key={category}
               onClick={(e) => {
