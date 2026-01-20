@@ -20,6 +20,7 @@ export async function middleware(request: NextRequest) {
         const token = request.cookies.get('admin_token')?.value
 
         if (!token) {
+            console.warn(`Middleware: No token found for protected path ${pathname}`);
             if (isDashboardRoute) return NextResponse.redirect(new URL('/login', request.url))
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -27,7 +28,8 @@ export async function middleware(request: NextRequest) {
         try {
             await jwtVerify(token, JWT_SECRET)
             return NextResponse.next()
-        } catch (e) {
+        } catch (e: any) {
+            console.error(`Middleware: JWT Verification failed for ${pathname}:`, e.message);
             if (isDashboardRoute) return NextResponse.redirect(new URL('/login', request.url))
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -38,6 +40,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
+        '/dashboard',
         '/dashboard/:path*',
         '/api/products/:path*',
         '/api/orders/:path*',

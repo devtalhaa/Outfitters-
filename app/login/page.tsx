@@ -16,20 +16,28 @@ export default function LoginPage() {
         e.preventDefault()
         setLoading(true)
         try {
+            console.log("Attempting login...")
             const res = await fetch("/api/admin/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ password }),
             })
 
+            const data = await res.json()
+
             if (res.ok) {
                 toast.success("Welcome back, Admin")
-                window.location.href = "/dashboard"
+                console.log("Login success, redirecting to /dashboard in 100ms...")
+                setTimeout(() => {
+                    router.push("/dashboard")
+                }, 100)
             } else {
-                toast.error("Invalid password")
+                console.error("Login failed:", data.error || "Unknown error")
+                toast.error(data.error || "Invalid password")
             }
         } catch (error) {
-            toast.error("Connection failed")
+            console.error("Login request failed:", error)
+            toast.error("Connection failed. Please check your internet or server status.")
         } finally {
             setLoading(false)
         }

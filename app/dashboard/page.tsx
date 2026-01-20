@@ -55,14 +55,19 @@ export default function DashboardPage() {
 
     const checkAuth = async () => {
         try {
+            console.log("Dashboard: Checking authentication status...");
             const res = await fetch("/api/admin/check")
+            console.log("Dashboard: Auth check status:", res.status);
             if (!res.ok) {
+                console.warn("Dashboard: Not authenticated, redirecting to /login");
                 router.push("/login")
             } else {
+                console.log("Dashboard: Authenticated, fetching data...");
                 setAuthLoading(false)
                 fetchData(1)
             }
         } catch (error) {
+            console.error("Dashboard: Auth check failed:", error);
             router.push("/login")
         }
     }
