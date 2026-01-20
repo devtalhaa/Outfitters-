@@ -187,7 +187,7 @@ export default function DashboardPage() {
             <aside className="w-64 bg-white border-r border-border hidden lg:flex flex-col sticky top-0 h-screen">
                 <div className="p-8 border-b border-border">
                     <h1 className="text-xl font-black tracking-tighter uppercase">Admin Panel</h1>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Outfitters Clone</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Lironda Admin</p>
                 </div>
 
                 <nav className="flex-1 p-4 space-y-2">

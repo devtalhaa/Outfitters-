@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Search, Heart, ShoppingBag, Menu, X, LayoutDashboard } from "lucide-react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { useWishlist } from "@/context/wishlist-context"
@@ -34,40 +35,20 @@ export function Header() {
   }, [])
 
   return (
-    <header className=" top-0 z-50 bg-white text-black shadow-sm ">
+    <header className="sticky top-0 z-50 bg-white text-black shadow-sm ">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Mobile Menu */}
-          <Sheet>
-            <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon" className="mr-2">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] p-0">
-              <div className="p-6">
-                <Link href="/" className="text-2xl font-bold tracking-tighter">
-                  OUTFITTERS
-                </Link>
-              </div>
-              <nav className="flex flex-col">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className={`px-6 py-4 border-b border-border hover:bg-muted transition-colors ${item.sale ? "text-accent font-semibold" : ""
-                      } ${item.highlight ? "font-semibold" : ""}`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
+
 
           {/* Logo */}
-          <Link href="/" className="text-xl lg:text-2xl font-bold tracking-tighter">
-            OUTFITTERS
+          <Link href="/" className="relative h-12 w-48 lg:h-20 lg:w-64">
+            <Image
+              src="/lironda-logo.png"
+              alt="Lironda"
+              fill
+              className="object-contain object-left"
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation */}

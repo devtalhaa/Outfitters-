@@ -58,7 +58,7 @@ export function CollectionHero({ activeCategory, onCategoryChange, initialSlider
       {/* Category List Section */}
       <div className="absolute top-0 left-0 right-0 z-30 bg-background/90 backdrop-blur-md border-b border-border py-6 overflow-x-auto">
         <div className="container mx-auto px-4">
-          <div className="flex justify-center items-center gap-8 lg:gap-16 whitespace-nowrap">
+          <div className="flex justify-start lg:justify-center items-center gap-8 lg:gap-16 whitespace-nowrap">
             {categories.map((cat) => (
               <button
                 key={cat._id}

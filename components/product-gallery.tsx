@@ -57,7 +57,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
                     fill
                     priority
                     className={cn(
-                        "object-cover transition-transform duration-200",
+                        "object-contain transition-transform duration-200",
                         isZoomed ? "scale-200" : "scale-100"
                     )}
                     style={isZoomed ? {

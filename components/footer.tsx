@@ -3,6 +3,7 @@
 import React from "react"
 import Link from "next/link"
 import { Facebook, Instagram, Twitter, Youtube, MapPin, Phone, Mail } from "lucide-react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 export function Footer() {
@@ -54,13 +55,13 @@ export function Footer() {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 px-4 py-3 bg-primary-foreground/10 border border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:border-primary-foreground/50"
+                className="flex-1 h-12 px-4 bg-primary-foreground/10 border border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:border-primary-foreground/50"
               />
               <Button
                 type="submit"
                 disabled={loading}
                 variant="secondary"
-                className="px-6 bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-bold"
+                className="h-12 px-6 bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-bold"
               >
                 {loading ? "Subscribing..." : "Subscribe"}
               </Button>
@@ -71,18 +72,25 @@ export function Footer() {
 
       {/* Main Footer */}
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-8">
           {/* About */}
           <div className="col-span-2 lg:col-span-1">
-            <h4 className="text-lg font-bold mb-4">OUTFITTERS</h4>
+            <Link href="/" className="block relative h-20 w-64 mb-6">
+              <Image
+                src="/lironda-logo.png"
+                alt="Lironda"
+                fill
+                className="object-contain object-left"
+              />
+            </Link>
             <p className="text-sm text-primary-foreground/70 mb-4">
               Pakistan&apos;s leading fashion brand offering trendy apparel and footwear for men, women, and kids.
             </p>
             <div className="flex gap-3">
-              <Link href="#" className="hover:opacity-70 transition-opacity">
+              <Link href="https://www.facebook.com/share/14SMRFXyUV2/" className="hover:opacity-70 transition-opacity">
                 <Facebook className="h-5 w-5" />
               </Link>
-              <Link href="#" className="hover:opacity-70 transition-opacity">
+              <Link href="http://www.instagram.com/lironda.pk" className="hover:opacity-70 transition-opacity">
                 <Instagram className="h-5 w-5" />
               </Link>
               <Link href="#" className="hover:opacity-70 transition-opacity">
@@ -92,70 +100,6 @@ export function Footer() {
                 <Youtube className="h-5 w-5" />
               </Link>
             </div>
-          </div>
-
-          {/* Shop */}
-          <div>
-            <h4 className="font-semibold mb-4">Shop</h4>
-            <ul className="space-y-2 text-sm text-primary-foreground/70">
-              <li>
-                <Link href="#" className="hover:text-primary-foreground">
-                  Men
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-primary-foreground">
-                  Women
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-primary-foreground">
-                  Kids
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-primary-foreground">
-                  Accessories
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-primary-foreground">
-                  Sale
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Customer Service */}
-          <div>
-            <h4 className="font-semibold mb-4">Customer Service</h4>
-            <ul className="space-y-2 text-sm text-primary-foreground/70">
-              <li>
-                <Link href="#" className="hover:text-primary-foreground">
-                  Contact Us
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-primary-foreground">
-                  Shipping & Delivery
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-primary-foreground">
-                  Returns & Exchange
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-primary-foreground">
-                  Track Order
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-primary-foreground">
-                  FAQs
-                </Link>
-              </li>
-            </ul>
           </div>
 
           {/* Company */}
@@ -215,13 +159,8 @@ export function Footer() {
       <div className="border-t border-primary-foreground/10">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-primary-foreground/70">
-            <p>© 2026 OUTFITTERS. All rights reserved.</p>
-            <div className="flex items-center gap-4">
-              <img src="/placeholder.svg?height=24&width=40" alt="Visa" className="h-6" />
-              <img src="/placeholder.svg?height=24&width=40" alt="Mastercard" className="h-6" />
-              <img src="/placeholder.svg?height=24&width=40" alt="JazzCash" className="h-6" />
-              <img src="/placeholder.svg?height=24&width=40" alt="Easypaisa" className="h-6" />
-            </div>
+            <p>© 2026 LIRONDA. All rights reserved.</p>
+
           </div>
         </div>
       </div>

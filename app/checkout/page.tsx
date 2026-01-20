@@ -100,7 +100,14 @@ export default function CheckoutPage() {
             <AnnouncementBar />
             <div className="bg-white border-b border-border py-6">
                 <div className="container mx-auto px-4 flex justify-between items-center">
-                    <Link href="/" className="text-2xl font-black tracking-tighter">OUTFITTERS</Link>
+                    <Link href="/" className="relative h-14 w-48">
+                        <Image
+                            src="/lironda-logo.png"
+                            alt="Lironda"
+                            fill
+                            className="object-contain object-left"
+                        />
+                    </Link>
                     <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground mr-4">
                         <Lock className="w-3 h-3" />
                         Secure Checkout

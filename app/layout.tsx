@@ -8,9 +8,12 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 export const metadata: Metadata = {
-  title: "OUTFITTERS | Men Footwear Collection",
+  title: "LIRONDA | Men Footwear Collection",
   description: "Shop the latest men's footwear collection - sneakers, loafers, sandals and more",
-  generator: 'v0.app'
+  generator: 'v0.app',
+  icons: {
+    icon: '/lironda-logo.png',
+  }
 }
 
 import { WishlistProvider } from "@/context/wishlist-context"

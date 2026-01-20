@@ -11,7 +11,7 @@ export function AnnouncementBar() {
   return (
     <div className="bg-primary text-primary-foreground py-2.5 px-4 text-center text-sm relative">
       <p className="font-medium">
-        ORDER OVER PKR 3,000 | USE CODE: <span className="underline">NEWSEASON</span> FOR 15% OFF
+        Welcome to Lironda
       </p>
       <button
         onClick={() => setIsVisible(false)}

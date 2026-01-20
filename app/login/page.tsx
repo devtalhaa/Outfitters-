@@ -60,7 +60,7 @@ export default function LoginPage() {
                     <p className="text-sm font-bold uppercase tracking-widest opacity-60">Inventory & Order Management System v1.0</p>
                 </div>
                 <div className="absolute bottom-12 left-12">
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em]">Outfitters Clone • 2024</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em]">Lironda • 2026</p>
                 </div>
             </div>
 

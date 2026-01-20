@@ -121,13 +121,13 @@ export function ProductDetail({ product }: ProductDetailProps) {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 lg:px-8">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase mb-10 text-muted-foreground">
+      <nav className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase mb-6 lg:mb-10 text-muted-foreground">
         <Link href="/" className="hover:text-foreground transition-all">Home</Link>
         <ChevronRight className="w-3 h-3" />
         <span className="text-foreground font-black">{product.name}</span>
       </nav>
 
-      <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
+      <div className="grid lg:grid-cols-2 gap-8 lg:gap-20">
         {/* Left: Product Gallery */}
         <div className="space-y-6">
           <ProductGallery images={product.images} />
@@ -152,7 +152,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
             </button>
           </div>
 
-          <div className="flex items-center gap-4 mb-10">
+          <div className="flex items-center gap-4 mb-6">
             <div className="flex flex-col">
               <span className="text-2xl lg:text-3xl font-black tracking-tight">PKR {product.price.toLocaleString()}</span>
               {product.originalPrice && (
