@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import {
     LayoutDashboard,
     ShoppingBag,
@@ -46,8 +46,12 @@ export default function DashboardPage() {
     const [subscribers, setSubscribers] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [currentPage, setCurrentPage] = useState(1)
-    const [limit, setLimit] = useState(12)
+    const [limit, setLimit] = useState(10)
     const [pagination, setPagination] = useState<any>(null)
+    // Infinite scroll state for products
+    const [loadingMore, setLoadingMore] = useState(false)
+    const [hasMore, setHasMore] = useState(true)
+    const productObserverRef = useRef<IntersectionObserver | null>(null)
     const [orderCurrentPage, setOrderCurrentPage] = useState(1)
     const [orderLimit, setOrderLimit] = useState(10)
     const [orderPagination, setOrderPagination] = useState<any>(null)
@@ -113,8 +117,12 @@ export default function DashboardPage() {
             if (prodData.products) {
                 setProducts(prodData.products)
                 setPagination(prodData.pagination)
+                setCurrentPage(page)
+                // Check if there are more products to load
+                setHasMore(page < prodData.pagination.pages)
             } else {
                 setProducts(Array.isArray(prodData) ? prodData : [])
+                setHasMore(false)
             }
 
             if (orderData.orders) {
@@ -137,6 +145,52 @@ export default function DashboardPage() {
             setLoading(false)
         }
     }
+
+    // Infinite scroll: fetch more products and append to existing list
+    const fetchMoreProducts = useCallback(async () => {
+        if (loadingMore || !hasMore) return
+
+        const nextPage = currentPage + 1
+        setLoadingMore(true)
+
+        try {
+            const res = await fetch(`/api/products?page=${nextPage}&limit=${limit}`)
+            const data = await res.json()
+
+            if (data.products && data.products.length > 0) {
+                setProducts(prev => [...prev, ...data.products])
+                setPagination(data.pagination)
+                setCurrentPage(nextPage)
+                setHasMore(nextPage < data.pagination.pages)
+            } else {
+                setHasMore(false)
+            }
+        } catch (error) {
+            toast.error("Failed to load more products")
+        } finally {
+            setLoadingMore(false)
+        }
+    }, [loadingMore, hasMore, currentPage, limit])
+
+    // Intersection Observer callback for infinite scroll trigger
+    const lastProductRef = useCallback((node: HTMLDivElement | null) => {
+        if (loading || loadingMore) return
+
+        if (productObserverRef.current) {
+            productObserverRef.current.disconnect()
+        }
+
+        productObserverRef.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                fetchMoreProducts()
+            }
+        }, { threshold: 0.1 })
+
+        if (node) {
+            productObserverRef.current.observe(node)
+        }
+    }, [loading, loadingMore, hasMore, fetchMoreProducts])
+
 
     const handleLogout = async () => {
         try {
@@ -287,26 +341,6 @@ export default function DashboardPage() {
                                         <p className="text-[10px] font-black uppercase tracking-widest">{dynamicCategories.length || FALLBACK_CATEGORIES.length} Categories Available</p>
                                     </div>
                                 )}
-                                {activeTab === "products" && (
-                                    <div className="flex items-center gap-2 border-l border-border pl-6">
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Per Page:</span>
-                                        <select
-                                            value={limit}
-                                            onChange={(e) => {
-                                                const newLimit = parseInt(e.target.value)
-                                                setLimit(newLimit)
-                                                setCurrentPage(1)
-                                                fetchData(1, newLimit, orderCurrentPage, orderLimit)
-                                            }}
-                                            className="bg-transparent text-[10px] font-black uppercase tracking-widest focus:outline-none cursor-pointer border-b border-foreground/20 hover:border-foreground"
-                                        >
-                                            <option value="12">12</option>
-                                            <option value="24">24</option>
-                                            <option value="48">48</option>
-                                            <option value="96">96</option>
-                                        </select>
-                                    </div>
-                                )}
                                 {activeTab === "orders" && (
                                     <div className="flex items-center gap-2 border-l border-border pl-6">
                                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Per Page:</span>
@@ -368,105 +402,84 @@ export default function DashboardPage() {
                     ) : activeTab === "products" ? (
                         <div className="space-y-8">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {products.map((product) => (
-                                    <div key={product._id} className="bg-white border border-border group relative overflow-hidden">
-                                        <div className="aspect-[4/5] relative bg-muted">
-                                            <Image
-                                                src={product.images[0]}
-                                                alt={product.name}
-                                                fill
-                                                className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                            />
-                                            <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Link
-                                                    href={`/dashboard/products/${product._id}`}
-                                                    className="p-2 bg-white shadow-xl hover:bg-muted"
-                                                    title="Detailed View & Stock Management"
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                </Link>
-                                                <button
-                                                    onClick={() => {
-                                                        setEditingProduct(product)
-                                                        setIsAddingProduct(true)
-                                                    }}
-                                                    className="p-2 bg-white shadow-xl hover:bg-muted"
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteProduct(product._id)}
-                                                    className="p-2 bg-white shadow-xl text-red-500 hover:bg-muted"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
+                                {products.map((product, index) => {
+                                    // Attach intersection observer to the 6th product from the end
+                                    const isObserverTarget = index === products.length - 6
+
+                                    return (
+                                        <div
+                                            key={product._id}
+                                            ref={isObserverTarget ? lastProductRef : null}
+                                            className="bg-white border border-border group relative overflow-hidden"
+                                        >
+                                            <div className="aspect-[4/5] relative bg-muted">
+                                                <Image
+                                                    src={product.images[0]}
+                                                    alt={product.name}
+                                                    fill
+                                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                                />
+                                                <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Link
+                                                        href={`/dashboard/products/${product._id}`}
+                                                        className="p-2 bg-white shadow-xl hover:bg-muted"
+                                                        title="Detailed View & Stock Management"
+                                                    >
+                                                        <Eye className="w-4 h-4" />
+                                                    </Link>
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingProduct(product)
+                                                            setIsAddingProduct(true)
+                                                        }}
+                                                        className="p-2 bg-white shadow-xl hover:bg-muted"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteProduct(product._id)}
+                                                        className="p-2 bg-white shadow-xl text-red-500 hover:bg-muted"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="p-4">
+                                                <div className="flex justify-between items-start mb-1">
+                                                    <h4 className="text-xs font-bold uppercase tracking-tight">{product.name}</h4>
+                                                    <span className="text-xs font-black">PKR {product.price.toLocaleString()}</span>
+                                                </div>
+                                                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+                                                    {product.category} • {product.articleCode}
+                                                </p>
+                                                <div className="mt-3 pt-3 border-t border-muted flex gap-2">
+                                                    {product.sizes?.map((s: any) => (
+                                                        <span key={s.value} className={`text-[9px] font-bold px-1.5 py-0.5 border ${s.stock === 0 ? "opacity-30 line-through" : "bg-muted"}`}>
+                                                            {s.value}
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="p-4">
-                                            <div className="flex justify-between items-start mb-1">
-                                                <h4 className="text-xs font-bold uppercase tracking-tight">{product.name}</h4>
-                                                <span className="text-xs font-black">PKR {product.price.toLocaleString()}</span>
-                                            </div>
-                                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-                                                {product.category} • {product.articleCode}
-                                            </p>
-                                            <div className="mt-3 pt-3 border-t border-muted flex gap-2">
-                                                {product.sizes?.map((s: any) => (
-                                                    <span key={s.value} className={`text-[9px] font-bold px-1.5 py-0.5 border ${s.stock === 0 ? "opacity-30 line-through" : "bg-muted"}`}>
-                                                        {s.value}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                             </div>
 
-                            {pagination && (
-                                <div className="flex flex-col items-center gap-6 pt-12 border-t border-border mt-8">
-                                    <div className="flex items-center gap-4">
-                                        <Button
-                                            variant="outline"
-                                            disabled={currentPage === 1}
-                                            onClick={() => {
-                                                const newPage = currentPage - 1
-                                                setCurrentPage(newPage)
-                                                fetchData(newPage)
-                                            }}
-                                            className="rounded-none h-14 px-8 text-xs font-black uppercase tracking-widest border-2 border-foreground hover:bg-foreground hover:text-background disabled:opacity-20 transition-all active:scale-95"
-                                        >
-                                            Previous Page
-                                        </Button>
-                                        <div className="flex items-center gap-2">
-                                            {[...Array(pagination.pages)].map((_, i) => (
-                                                <button
-                                                    key={i}
-                                                    onClick={() => {
-                                                        const newPage = i + 1
-                                                        setCurrentPage(newPage)
-                                                        fetchData(newPage)
-                                                    }}
-                                                    className={`w-14 h-14 text-xs font-black border-2 transition-all active:scale-90 ${currentPage === i + 1 ? "bg-foreground text-background border-foreground shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" : "border-border hover:border-foreground"}`}
-                                                >
-                                                    {i + 1}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <Button
-                                            variant="outline"
-                                            disabled={currentPage === pagination.pages}
-                                            onClick={() => {
-                                                const newPage = currentPage + 1
-                                                setCurrentPage(newPage)
-                                                fetchData(newPage)
-                                            }}
-                                            className="rounded-none h-14 px-8 text-xs font-black uppercase tracking-widest border-2 border-foreground hover:bg-foreground hover:text-background disabled:opacity-20 transition-all active:scale-95"
-                                        >
-                                            Next Page
-                                        </Button>
-                                    </div>
+                            {/* Infinite scroll loading indicator */}
+                            {loadingMore && (
+                                <div className="flex flex-col items-center justify-center py-12">
+                                    <Loader2 className="w-8 h-8 animate-spin text-foreground mb-3" />
                                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
-                                        Page {currentPage} of {pagination.pages} • Total {pagination.total} Products
+                                        Loading more products...
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* End of products indicator */}
+                            {!hasMore && products.length > 0 && (
+                                <div className="flex flex-col items-center justify-center py-12 border-t border-border mt-8">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
+                                        Showing all {pagination?.total || products.length} products
                                     </p>
                                 </div>
                             )}

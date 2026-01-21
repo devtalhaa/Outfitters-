@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Heart, ShoppingBag, Loader2, ArrowRight } from "lucide-react"
@@ -17,12 +17,25 @@ export function ProductGrid({ filters }: ProductGridProps) {
   const [products, setProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(8)
+  const [itemsPerPage] = useState(10) // Fixed for infinite scroll
   const [pagination, setPagination] = useState<any>(null)
+  // Infinite scroll state
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const productObserverRef = useRef<IntersectionObserver | null>(null)
+  const filtersRef = useRef(filters) // Track filter changes
 
+  // Update filters ref when filters change
+  useEffect(() => {
+    filtersRef.current = filters
+  }, [filters])
+
+  // Initial fetch and reset when filters change
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true)
+      setCurrentPage(1)
+      setHasMore(true)
       try {
         const params = new URLSearchParams()
         if (filters.category && filters.category !== "All Footwear") params.set("category", filters.category)
@@ -32,7 +45,7 @@ export function ProductGrid({ filters }: ProductGridProps) {
         if (filters.maxPrice) params.set("maxPrice", filters.maxPrice)
         if (filters.sort) params.set("sort", filters.sort)
 
-        params.set("page", currentPage.toString())
+        params.set("page", "1")
         params.set("limit", itemsPerPage.toString())
 
         const res = await fetch(`/api/products?${params.toString()}`)
@@ -41,9 +54,11 @@ export function ProductGrid({ filters }: ProductGridProps) {
         if (data.products) {
           setProducts(data.products)
           setPagination(data.pagination)
+          setHasMore(1 < data.pagination.pages)
         } else {
           setProducts(Array.isArray(data) ? data : [])
           setPagination(null)
+          setHasMore(false)
         }
       } catch (error) {
         console.error("Failed to fetch products", error)
@@ -52,12 +67,64 @@ export function ProductGrid({ filters }: ProductGridProps) {
       }
     }
     fetchProducts()
-  }, [filters, currentPage, itemsPerPage])
+  }, [filters, itemsPerPage])
 
-  // Reset to first page when filters or limit change
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [filters.category, filters.size, filters.color, filters.minPrice, filters.maxPrice, filters.sort, itemsPerPage])
+  // Fetch more products for infinite scroll
+  const fetchMoreProducts = useCallback(async () => {
+    if (loadingMore || !hasMore) return
+
+    const nextPage = currentPage + 1
+    setLoadingMore(true)
+
+    try {
+      const params = new URLSearchParams()
+      const currentFilters = filtersRef.current
+      if (currentFilters.category && currentFilters.category !== "All Footwear") params.set("category", currentFilters.category)
+      if (currentFilters.size) params.set("size", currentFilters.size)
+      if (currentFilters.color) params.set("color", currentFilters.color)
+      if (currentFilters.minPrice) params.set("minPrice", currentFilters.minPrice)
+      if (currentFilters.maxPrice) params.set("maxPrice", currentFilters.maxPrice)
+      if (currentFilters.sort) params.set("sort", currentFilters.sort)
+
+      params.set("page", nextPage.toString())
+      params.set("limit", itemsPerPage.toString())
+
+      const res = await fetch(`/api/products?${params.toString()}`)
+      const data = await res.json()
+
+      if (data.products && data.products.length > 0) {
+        setProducts(prev => [...prev, ...data.products])
+        setPagination(data.pagination)
+        setCurrentPage(nextPage)
+        setHasMore(nextPage < data.pagination.pages)
+      } else {
+        setHasMore(false)
+      }
+    } catch (error) {
+      console.error("Failed to load more products", error)
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [loadingMore, hasMore, currentPage, itemsPerPage])
+
+  // Intersection Observer callback for infinite scroll trigger
+  const lastProductRef = useCallback((node: HTMLDivElement | null) => {
+    if (loading || loadingMore) return
+
+    if (productObserverRef.current) {
+      productObserverRef.current.disconnect()
+    }
+
+    productObserverRef.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        fetchMoreProducts()
+      }
+    }, { threshold: 0.1 })
+
+    if (node) {
+      productObserverRef.current.observe(node)
+    }
+  }, [loading, loadingMore, hasMore, fetchMoreProducts])
 
   if (loading) {
     return (
@@ -82,68 +149,40 @@ export function ProductGrid({ filters }: ProductGridProps) {
     <section className="container mx-auto px-4 py-8">
       {pagination && (
         <div className="flex justify-between items-center mb-8 pb-4 border-b border-border">
-          <div className="flex items-center gap-6">
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-              Showing <span className="text-foreground">{products.length}</span> of <span className="text-foreground">{pagination.total}</span> Results
-            </p>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Show:</span>
-              <select
-                value={itemsPerPage}
-                onChange={(e) => setItemsPerPage(parseInt(e.target.value))}
-                className="bg-transparent text-[10px] font-black uppercase tracking-widest focus:outline-none cursor-pointer border-b border-foreground/20 hover:border-foreground"
-              >
-                <option value="8">8</option>
-                <option value="12">12</option>
-                <option value="24">24</option>
-                <option value="48">48</option>
-              </select>
-            </div>
-          </div>
-          {pagination.pages > 1 && (
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-              Page <span className="text-foreground">{currentPage}</span> / {pagination.pages}
-            </p>
-          )}
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+            Showing <span className="text-foreground">{products.length}</span> of <span className="text-foreground">{pagination.total}</span> Results
+          </p>
         </div>
       )}
       <div className={`grid gap-4 lg:gap-8 ${filters.view === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" : "grid-cols-1"}`}>
-        {products.map((product) => (
-          <ProductCard key={product._id} product={product} view={filters.view} />
-        ))}
+        {products.map((product, index) => {
+          // Attach intersection observer to the 6th product from the end
+          const isObserverTarget = index === products.length - 6
+
+          return (
+            <div key={product._id} ref={isObserverTarget ? lastProductRef : null}>
+              <ProductCard product={product} view={filters.view} />
+            </div>
+          )
+        })}
       </div>
 
-      {pagination && pagination.pages > 1 && (
-        <div className="flex justify-center items-center gap-4 mt-12 border-t border-border pt-12">
-          <Button
-            variant="outline"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-            className="rounded-none px-8 h-12 border-2 border-foreground font-black uppercase tracking-widest disabled:opacity-20 flex items-center gap-2 group"
-          >
-            <div className="group-hover:-translate-x-1 transition-transform">←</div> Prev
-          </Button>
+      {/* Infinite scroll loading indicator */}
+      {loadingMore && (
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-foreground mb-3" />
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
+            Loading more products...
+          </p>
+        </div>
+      )}
 
-          <div className="flex items-center gap-2">
-            {[...Array(pagination.pages)].map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`w-12 h-12 text-[10px] font-black transition-all border-2 ${currentPage === i + 1 ? "bg-foreground text-background border-foreground shadow-xl scale-110" : "bg-white text-foreground border-transparent hover:border-border"}`}
-              >
-                {i + 1}
-              </button>
-            ))}
-          </div>
-
-          <Button
-            variant="outline"
-            disabled={currentPage === pagination.pages}
-            onClick={() => setCurrentPage(prev => Math.min(pagination.pages, prev + 1))}
-            className="rounded-none px-8 h-12 border-2 border-foreground font-black uppercase tracking-widest disabled:opacity-20 flex items-center gap-2 group"
-          >
-            Next <div className="group-hover:translate-x-1 transition-transform">→</div>
-          </Button>
+      {/* End of products indicator */}
+      {!hasMore && products.length > 0 && (
+        <div className="flex flex-col items-center justify-center py-12 border-t border-border mt-8">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
+            Showing all {pagination?.total || products.length} products
+          </p>
         </div>
       )}
     </section>
