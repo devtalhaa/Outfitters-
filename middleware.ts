@@ -21,7 +21,10 @@ export async function middleware(request: NextRequest) {
 
         if (!token) {
             console.warn(`Middleware: No token found for protected path ${pathname}`);
-            if (isDashboardRoute) return NextResponse.redirect(new URL('/login', request.url))
+            if (isDashboardRoute) {
+                const url = new URL('/login', request.url);
+                return NextResponse.redirect(url);
+            }
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
@@ -30,7 +33,10 @@ export async function middleware(request: NextRequest) {
             return NextResponse.next()
         } catch (e: any) {
             console.error(`Middleware: JWT Verification failed for ${pathname}:`, e.message);
-            if (isDashboardRoute) return NextResponse.redirect(new URL('/login', request.url))
+            if (isDashboardRoute) {
+                const url = new URL('/login', request.url);
+                return NextResponse.redirect(url);
+            }
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
     }

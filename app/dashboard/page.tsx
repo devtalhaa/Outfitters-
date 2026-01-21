@@ -65,7 +65,7 @@ export default function DashboardPage() {
     const checkAuth = async () => {
         try {
             console.log("Dashboard: Checking authentication status...");
-            const res = await fetch("/api/admin/check")
+            const res = await fetch("/api/admin/check", { cache: "no-store" })
             console.log("Dashboard: Auth check status:", res.status);
             if (!res.ok) {
                 console.warn("Dashboard: Not authenticated, redirecting to /login");

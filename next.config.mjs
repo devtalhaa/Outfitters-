@@ -6,7 +6,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
- 
+  serverExternalPackages: ["mongoose"],
 }
 
 export default nextConfig

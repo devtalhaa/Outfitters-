@@ -12,6 +12,15 @@ const JWT_SECRET = new TextEncoder().encode(
 export async function POST(req: NextRequest) {
     try {
         console.log("POST /api/admin/login - Connecting to DB...");
+        
+        if (!process.env.MONGODB_URI) {
+            console.error("MONGODB_URI is not defined");
+            return NextResponse.json(
+                { error: "Server configuration error: Database not configured" },
+                { status: 500 }
+            );
+        }
+
         await dbConnect();
         const { password } = await req.json();
 
@@ -24,6 +33,8 @@ export async function POST(req: NextRequest) {
             const hashedPassword = await bcrypt.hash(defaultPassword, salt);
             admin = await Admin.create({ passwordHash: hashedPassword });
             console.log("Admin seeded successfully.");
+        } else {
+            console.log("Admin account found.");
         }
 
         // Compare passwords
@@ -41,11 +52,15 @@ export async function POST(req: NextRequest) {
             .setExpirationTime("24h")
             .sign(JWT_SECRET);
 
+        // Determine environment and cookie settings
+        const isProduction = process.env.NODE_ENV === "production";
+        console.log(`Setting cookie (Production: ${isProduction})`);
+
         // Set cookie
         const cookieStore = await cookies();
         cookieStore.set("admin_token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: isProduction,
             sameSite: "lax",
             maxAge: 60 * 60 * 24, // 1 day
             path: "/",

@@ -17,6 +17,7 @@ export const metadata: Metadata = {
 }
 
 import { WishlistProvider } from "@/context/wishlist-context"
+import { WhatsAppButton } from "@/components/whatsapp-button"
 
 export default function RootLayout({
   children,
@@ -29,6 +30,7 @@ export default function RootLayout({
         <WishlistProvider>
           {children}
         </WishlistProvider>
+        <WhatsAppButton />
         <Toaster position="top-center" richColors />
         <Analytics />
       </body>
