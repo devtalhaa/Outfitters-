@@ -137,24 +137,24 @@ export function ProductGrid({ filters }: ProductGridProps) {
 
   if (products.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-40 border-y border-dashed border-border mx-4">
-        <ShoppingBag className="w-12 h-12 text-muted-foreground opacity-20 mb-4" />
-        <h3 className="text-xl font-black uppercase tracking-tight">No products found</h3>
-        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-2">Try adjusting your filters or category</p>
+      <div className="flex flex-col items-center justify-center py-20 sm:py-40 border-y border-dashed border-border mx-3 sm:mx-4">
+        <ShoppingBag className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground opacity-20 mb-3 sm:mb-4" />
+        <h3 className="text-base sm:text-xl font-black uppercase tracking-tight">No products found</h3>
+        <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-2">Try adjusting your filters</p>
       </div>
     )
   }
 
   return (
-    <section className="container mx-auto px-4 py-8">
+    <section className="container mx-auto px-2 sm:px-4 py-6 sm:py-8">
       {pagination && (
-        <div className="flex justify-between items-center mb-8 pb-4 border-b border-border">
-          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-            Showing <span className="text-foreground">{products.length}</span> of <span className="text-foreground">{pagination.total}</span> Results
+        <div className="flex justify-between items-center mb-4 sm:mb-8 pb-3 sm:pb-4 border-b border-border">
+          <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider sm:tracking-widest text-muted-foreground">
+            Showing <span className="text-foreground">{products.length}</span> of <span className="text-foreground">{pagination.total}</span>
           </p>
         </div>
       )}
-      <div className={`grid gap-4 lg:gap-8 ${filters.view === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" : "grid-cols-1"}`}>
+      <div className={`grid gap-2 sm:gap-4 lg:gap-8 ${filters.view === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" : "grid-cols-1"}`}>
         {products.map((product, index) => {
           // Attach intersection observer to the 6th product from the end
           const isObserverTarget = index === products.length - 6
@@ -169,19 +169,19 @@ export function ProductGrid({ filters }: ProductGridProps) {
 
       {/* Infinite scroll loading indicator */}
       {loadingMore && (
-        <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-foreground mb-3" />
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
-            Loading more products...
+        <div className="flex flex-col items-center justify-center py-8 sm:py-12">
+          <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-foreground mb-2 sm:mb-3" />
+          <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-muted-foreground">
+            Loading more...
           </p>
         </div>
       )}
 
       {/* End of products indicator */}
       {!hasMore && products.length > 0 && (
-        <div className="flex flex-col items-center justify-center py-12 border-t border-border mt-8">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
-            Showing all {pagination?.total || products.length} products
+        <div className="flex flex-col items-center justify-center py-8 sm:py-12 border-t border-border mt-6 sm:mt-8">
+          <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-muted-foreground">
+            All {pagination?.total || products.length} products shown
           </p>
         </div>
       )}
@@ -347,7 +347,7 @@ function ProductCard({ product, view }: { product: any; view: string }) {
             </span>
           )}
           {product.category === "Sneakers" && (
-            <span className="px-3 py-1.5 text-[9px] font-black bg-foreground text-background uppercase tracking-[0.2em] shadow-xl rounded-full">
+            <span className="px-2 sm:px-3 py-1 sm:py-1.5 text-[8px] sm:text-[9px] font-black bg-foreground text-background uppercase tracking-[0.15em] sm:tracking-[0.2em] shadow-xl rounded-full">
               Trend
             </span>
           )}
@@ -356,9 +356,9 @@ function ProductCard({ product, view }: { product: any; view: string }) {
         {/* Wishlist Button */}
         <button
           onClick={handleWishlist}
-          className="absolute top-4 right-4 p-2.5 bg-background shadow-xl hover:bg-foreground hover:text-background transition-all duration-300 z-20 group/wish rounded-full"
+          className="absolute top-2 right-2 sm:top-4 sm:right-4 p-1.5 sm:p-2.5 bg-background shadow-xl hover:bg-foreground hover:text-background transition-all duration-300 z-20 group/wish rounded-full"
         >
-          <Heart className={`h-4 w-4 transition-transform group-hover/wish:scale-125 ${isWishlisted(product._id) ? "fill-red-500 text-red-500" : ""}`} />
+          <Heart className={`h-3 w-3 sm:h-4 sm:w-4 transition-transform group-hover/wish:scale-125 ${isWishlisted(product._id) ? "fill-red-500 text-red-500" : ""}`} />
         </button>
 
         {/* Quick Actions overlay */}
@@ -408,13 +408,13 @@ function ProductCard({ product, view }: { product: any; view: string }) {
       </div>
 
       {/* Product Info */}
-      <div className="space-y-1 block cursor-pointer" onClick={() => router.push(`/product/${product.slug}`)}>
-        <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">{product.category}</p>
-        <h3 className="text-xs font-black uppercase tracking-tight group-hover:underline line-clamp-1">{product.name}</h3>
-        <div className="flex items-center gap-3 pt-1">
-          <span className="text-sm font-black tracking-tight">PKR {product.price.toLocaleString()}</span>
+      <div className="space-y-0.5 sm:space-y-1 block cursor-pointer p-1 sm:p-0" onClick={() => router.push(`/product/${product.slug}`)}>
+        <p className="text-[8px] sm:text-[9px] font-black text-muted-foreground uppercase tracking-[0.15em] sm:tracking-[0.2em]">{product.category}</p>
+        <h3 className="text-[10px] sm:text-xs font-black uppercase tracking-tight group-hover:underline line-clamp-1">{product.name}</h3>
+        <div className="flex items-center gap-1.5 sm:gap-3 pt-0.5 sm:pt-1">
+          <span className="text-xs sm:text-sm font-black tracking-tight">PKR {product.price.toLocaleString()}</span>
           {product.originalPrice && (
-            <span className="text-[10px] text-muted-foreground line-through font-bold">
+            <span className="text-[8px] sm:text-[10px] text-muted-foreground line-through font-bold hidden sm:inline">
               PKR {product.originalPrice.toLocaleString()}
             </span>
           )}

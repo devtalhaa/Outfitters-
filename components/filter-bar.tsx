@@ -30,10 +30,10 @@ export function FilterBar({ filters, updateFilters, activeCategory, onCategoryCh
   const categoryNames = ["All Footwear", ...categories.map(c => c.name)]
 
   return (
-    <div className=" top-16 lg:top-20 z-40 bg-background border-b border-border shadow-sm">
-      <div className="container mx-auto px-4 py-4">
-        {/* Category Filter Buttons */}
-        <div className="flex flex-wrap gap-2 mb-6">
+    <div className="top-16 lg:top-20 z-40 bg-background border-b border-border shadow-sm">
+      <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-4">
+        {/* Category Filter Buttons - Horizontal scroll on mobile */}
+        <div className="flex overflow-x-auto gap-1.5 sm:gap-2 mb-4 sm:mb-6 pb-2 -mx-2 px-2 scrollbar-hide">
           {categoryNames.map((category) => (
             <button
               key={category}
@@ -41,9 +41,9 @@ export function FilterBar({ filters, updateFilters, activeCategory, onCategoryCh
                 e.preventDefault()
                 onCategoryChange(category)
               }}
-              className={`px-6 py-2.5 text-[10px] font-black tracking-widest uppercase transition-all duration-300 border-2 ${activeCategory === category
+              className={`px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 text-[9px] sm:text-[10px] font-black tracking-wider sm:tracking-widest uppercase transition-all duration-300 border-2 flex-shrink-0 whitespace-nowrap ${activeCategory === category
                 ? "bg-foreground text-background border-foreground shadow-lg scale-105"
-                : "bg-background text-foreground border-transparent hover:border-border"
+                : "bg-background text-foreground border-border hover:border-foreground"
                 }`}
             >
               {category}

@@ -35,13 +35,12 @@ export function Header() {
   }, [])
 
   return (
-    <header className="sticky top-0 z-50 bg-white text-black shadow-sm ">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 lg:h-20">
+    <header className="sticky top-0 z-50 bg-white text-black shadow-sm">
+      <div className="container mx-auto px-2 sm:px-4">
+        <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20">
 
-
-          {/* Logo */}
-          <Link href="/" className="relative h-12 w-48 lg:h-20 lg:w-64">
+          {/* Logo - Smaller on mobile */}
+          <Link href="/" className="relative h-10 w-32 sm:h-12 sm:w-40 lg:h-20 lg:w-64 flex-shrink-0">
             <Image
               src="/lironda-logo.png"
               alt="Lironda"
@@ -65,17 +64,17 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Actions */}
-          <div className="flex items-center gap-1 lg:gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setSearchOpen(!searchOpen)} className="relative hover:bg-muted">
-              <Search className="h-5 w-5" />
+          {/* Actions - Responsive icon sizing */}
+          <div className="flex items-center gap-0.5 sm:gap-1 lg:gap-2">
+            <Button variant="ghost" size="icon" onClick={() => setSearchOpen(!searchOpen)} className="relative hover:bg-muted h-9 w-9 sm:h-10 sm:w-10">
+              <Search className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
             <Link href="/dashboard" className="hidden sm:flex p-2 hover:bg-muted rounded-md transition-colors">
-              <LayoutDashboard className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+              <LayoutDashboard className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-foreground" />
             </Link>
             <Link href="/wishlist">
-              <Button variant="ghost" size="icon" className="hidden sm:flex relative">
-                <Heart className={`h-5 w-5 ${wishlist.length > 0 ? "fill-red-500 text-red-500" : ""}`} />
+              <Button variant="ghost" size="icon" className="hidden sm:flex relative h-9 w-9 sm:h-10 sm:w-10">
+                <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${wishlist.length > 0 ? "fill-red-500 text-red-500" : ""}`} />
                 {wishlist.length > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-[8px] font-black flex items-center justify-center animate-in zoom-in duration-300">
                     {wishlist.length}
@@ -84,10 +83,10 @@ export function Header() {
               </Button>
             </Link>
             <Link href="/cart">
-              <Button variant="ghost" size="icon" className="relative">
-                <ShoppingBag className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="relative h-9 w-9 sm:h-10 sm:w-10">
+                <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-black flex items-center justify-center animate-in zoom-in duration-300">
+                  <span className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-primary text-primary-foreground text-[8px] sm:text-[10px] font-black flex items-center justify-center animate-in zoom-in duration-300">
                     {cartCount}
                   </span>
                 )}
@@ -96,15 +95,15 @@ export function Header() {
           </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar - Full width on mobile */}
         {searchOpen && (
-          <div className="py-4 border-t border-border">
+          <div className="py-3 sm:py-4 border-t border-border">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="search"
-                placeholder="Search for products..."
-                className="w-full pl-10 pr-10 py-3 border border-border focus:outline-none focus:border-foreground transition-colors"
+                placeholder="Search products..."
+                className="w-full pl-10 pr-10 py-2.5 sm:py-3 text-sm border border-border focus:outline-none focus:border-foreground transition-colors"
                 autoFocus
               />
               <button onClick={() => setSearchOpen(false)} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -117,3 +116,4 @@ export function Header() {
     </header>
   )
 }
+

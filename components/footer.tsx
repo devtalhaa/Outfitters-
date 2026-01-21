@@ -43,27 +43,27 @@ export function Footer() {
     <footer className="bg-primary text-primary-foreground">
       {/* Newsletter Section */}
       <div className="border-b border-primary-foreground/10">
-        <div className="container mx-auto px-4 py-12">
+        <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-12">
           <div className="max-w-xl mx-auto text-center">
-            <h3 className="text-2xl font-bold mb-2">Join Our Newsletter</h3>
-            <p className="text-primary-foreground/70 mb-6">
-              Subscribe to get special offers, free giveaways, and exclusive deals.
+            <h3 className="text-xl sm:text-2xl font-bold mb-2">Join Our Newsletter</h3>
+            <p className="text-primary-foreground/70 mb-4 sm:mb-6 text-sm sm:text-base">
+              Subscribe to get special offers and exclusive deals.
             </p>
-            <form onSubmit={handleSubscribe} className="flex gap-2">
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2">
               <input
                 type="email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 h-12 px-4 bg-primary-foreground/10 border border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:border-primary-foreground/50"
+                className="flex-1 h-11 sm:h-12 px-4 bg-primary-foreground/10 border border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:border-primary-foreground/50 text-sm"
               />
               <Button
                 type="submit"
                 disabled={loading}
                 variant="secondary"
-                className="h-12 px-6 bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-bold"
+                className="h-11 sm:h-12 px-6 bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-bold text-sm w-full sm:w-auto"
               >
-                {loading ? "Subscribing..." : "Subscribe"}
+                {loading ? "..." : "Subscribe"}
               </Button>
             </form>
           </div>
@@ -71,11 +71,11 @@ export function Footer() {
       </div>
 
       {/* Main Footer */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-8">
+      <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* About */}
-          <div className="col-span-2 lg:col-span-1">
-            <Link href="/" className="block relative h-20 w-64 mb-6">
+          <div className="sm:col-span-2 lg:col-span-1">
+            <Link href="/" className="block relative h-14 w-40 sm:h-20 sm:w-64 mb-4 sm:mb-6">
               <Image
                 src="/lironda-logo.png"
                 alt="Lironda"
@@ -83,29 +83,29 @@ export function Footer() {
                 className="object-contain object-left"
               />
             </Link>
-            <p className="text-sm text-primary-foreground/70 mb-4">
-              Pakistan&apos;s leading fashion brand offering trendy apparel and footwear for men, women, and kids.
+            <p className="text-xs sm:text-sm text-primary-foreground/70 mb-4">
+              Pakistan&apos;s leading fashion brand offering trendy apparel and footwear.
             </p>
             <div className="flex gap-3">
               <Link href="https://www.facebook.com/share/14SMRFXyUV2/" className="hover:opacity-70 transition-opacity">
-                <Facebook className="h-5 w-5" />
+                <Facebook className="h-4 w-4 sm:h-5 sm:w-5" />
               </Link>
               <Link href="http://www.instagram.com/lironda.pk" className="hover:opacity-70 transition-opacity">
-                <Instagram className="h-5 w-5" />
+                <Instagram className="h-4 w-4 sm:h-5 sm:w-5" />
               </Link>
               <Link href="#" className="hover:opacity-70 transition-opacity">
-                <Twitter className="h-5 w-5" />
+                <Twitter className="h-4 w-4 sm:h-5 sm:w-5" />
               </Link>
               <Link href="#" className="hover:opacity-70 transition-opacity">
-                <Youtube className="h-5 w-5" />
+                <Youtube className="h-4 w-4 sm:h-5 sm:w-5" />
               </Link>
             </div>
           </div>
 
           {/* Company */}
           <div>
-            <h4 className="font-semibold mb-4">Company</h4>
-            <ul className="space-y-2 text-sm text-primary-foreground/70">
+            <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Company</h4>
+            <ul className="space-y-2 text-xs sm:text-sm text-primary-foreground/70">
               <li>
                 <Link href="#" className="hover:text-primary-foreground">
                   About Us
@@ -136,19 +136,19 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="font-semibold mb-4">Contact</h4>
-            <ul className="space-y-3 text-sm text-primary-foreground/70">
+            <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Contact</h4>
+            <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-primary-foreground/70">
               <li className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                <span>123 Fashion Street, Lahore, Pakistan</span>
+                <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 mt-0.5 shrink-0" />
+                <span>123 Fashion Street, Lahore</span>
               </li>
               <li className="flex items-center gap-2">
-                <Phone className="h-4 w-4 shrink-0" />
+                <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <span>+92 42 1234 5678</span>
               </li>
               <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4 shrink-0" />
-                <span>support@outfitters.pk</span>
+                <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                <span className="break-all">support@outfitters.pk</span>
               </li>
             </ul>
           </div>
@@ -157,8 +157,8 @@ export function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-primary-foreground/10">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-primary-foreground/70">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-2 text-xs sm:text-sm text-primary-foreground/70">
             <p>© 2026 LIRONDA. All rights reserved.</p>
 
           </div>
@@ -167,3 +167,4 @@ export function Footer() {
     </footer>
   )
 }
+
